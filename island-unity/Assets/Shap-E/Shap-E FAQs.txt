@@ -1,0 +1,31 @@
+Thank you for purchasing Shap-E-text to 3D.
+
+This FAQ file contains general FAQs and frequently faced issues.
+
+- I just purchased this asset and cannot see my invoice number on the store. What do I do?
+
+If you have just purchased the asset, please allow Unity 2-4 hours to generate an invoice number, which you can use to access the Shap-E generators. If this invoice number is not available even after 6 hours, please let us know at info@aikodex.com.
+
+- Can I use these models in my game? Can I make a game that uses Shap-E-text to 3D?
+
+Yes, you can use these models for commercial purposes. You will have the copyright for all the models you generate, thereby granting you full ownership of models created with this Unity asset. You can use the models for all commercial activities.
+
+- I am getting an error when I click on "Generate 3D Model".
+
+There are different errors: 500 internal server error, 429 too many requests error, and 400 bad request error. The most common error is the 400 bad request error. Please do not include any special characters, quotes, or new lines in your prompt. Try not to copy and paste from a source either, as that sometimes includes special formatting. Other types of server errors are mentioned in the documentation.
+
+- I am getting a lot of errors, and the UI looks incorrect. How do I rectify this?
+
+Please do not change the directory of Shap-E. Try to keep the directories pointing to the default values: Shap-E folder right under Assets and Models folder under Assets/Shap-E.
+
+- Where can I find my models that I have generated? How do I view the models in the editor?
+
+The default location for the models is Assets/Shap-E/Models. You can find the models that you generate in that folder. To view a model, simply select the model and hover your cursor over the Shap-E window. This will make the model visible and interactable in the window.
+
+- I cannot see any textures, yet my model looks colored and textured. How does this happen? Is there a way I can convert the colors to textures?
+
+Shap-E models use vertex colors, a property of the model in which you can store color data for each vertex. This eliminates the requirement of having textures and UV maps. Conversion is possible using an external 3D application.
+
+- I need to generate more than the current limit. How can I increase my quota?
+
+Currently, we do not offer paid quota increases, but we are working on such a system. A workaround would be to buy another copy of the asset and use that invoice number so you can generate twice the limit. However, we do not recommend this method.
