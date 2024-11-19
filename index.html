@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儲存 URL</title>
+</head>
+<body>
+    <h1>輸入 URL</h1>
+    <input type="text" id="urlInput" placeholder="輸入 URL">
+    <button onclick="sendURL()">儲存 URL</button>
+
+    <script>
+        function sendURL() {
+            var url = document.getElementById("urlInput").value;
+
+            // 送出資料到後端 (Python)
+            fetch('http://localhost:5000/save-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('URL 儲存成功!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
