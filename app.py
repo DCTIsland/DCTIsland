@@ -30,7 +30,7 @@ def is_url_accessible(url):
 # 儲存 URL 至 CSV 檔案
 def save_url_to_csv(url):
     try:
-        with open('https://github.com/DCTIsland/DCTIsland/blob/68047657c9dc9069515b1a177ce14fb557bebe7e/urls.csv', mode='a', newline='', encoding='utf-8') as file:
+        with open('urls.csv', mode='a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow([url])  # 寫入 URL 到 CSV
         print(f"URL 已成功寫入 CSV: {url}")
