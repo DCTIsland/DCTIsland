@@ -1,6 +1,7 @@
 import re
+import os
 import requests
-import csv
+import mysql.connector
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
 
@@ -11,6 +12,23 @@ THREADS_BASE_URL = "https://www.threads.net/@"  # 修改為正確的網址
 
 # 定義合法的 Threads ID 格式：字母、數字、點、底線
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
+
+# MySQL 資料庫設定
+DB_CONFIG = {
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASSWORD', '20241126'),
+    'database': os.environ.get('DB_NAME', 'user_threads')
+}
+
+# 建立 MySQL 連接
+def get_db_connection():
+    return mysql.connector.connect(
+        host=DB_CONFIG['host'],
+        user=DB_CONFIG['user'],
+        password=DB_CONFIG['password'],
+        database=DB_CONFIG['database']
+    )
 
 # 檢查 URL 是否有效
 def is_url_accessible(url):
@@ -27,15 +45,30 @@ def is_url_accessible(url):
     except requests.RequestException:
         return False
 
-# 儲存 URL 至 CSV 檔案
-def save_url_to_csv(url):
+# 儲存 URL 和 ID 到 MySQL 資料庫
+def save_url_to_mysql(threads_id, url, replies_text=''):
+    connection = None
+    cursor = None
     try:
-        with open('DCTIsland/urls.csv', mode='a', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow([url])  # 寫入 URL 到 CSV
-        print(f"URL 已成功寫入 CSV: {url}")
-    except Exception as e:
-        print(f"無法寫入 CSV 檔案：{e}")
+        # 建立資料庫連線
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        # 修改 SQL 插入語句，加入 replies_text 欄位
+        query = "INSERT INTO threads (thread_id, link, replies_text) VALUES (%s, %s, %s)"
+        cursor.execute(query, (threads_id, url, replies_text))
+        
+        # 提交交易
+        connection.commit()
+
+        print(f"URL 和 ID 已成功寫入資料庫: {threads_id}, {url}, {replies_text}")
+    except mysql.connector.Error as err:
+        print(f"資料庫錯誤: {err}")
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
 @app.route('/')
 def home():
@@ -43,22 +76,24 @@ def home():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    threads_id = request.form.get('threads_id')  # 從表單取得使用者輸入的 Threads ID
-    if not threads_id or not THREADS_ID_REGEX.match(threads_id):  # 使用正則表達式驗證
+    thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
+    if not thread_id or not THREADS_ID_REGEX.match(thread_id):  # 使用正則表達式驗證
         return "無效的 Threads ID, 請確認格式正確！", 400
 
     # 自動拼接完整的 Threads URL
-    full_url = THREADS_BASE_URL + threads_id
+    full_url = THREADS_BASE_URL + thread_id
 
     # 檢查 URL 是否存在並有效
     if not is_url_accessible(full_url):
         return f"生成的 URL 無效或不存在：{full_url}", 404
 
-    # 儲存 URL 至 CSV 檔案
-    save_url_to_csv(full_url)
+    # 儲存 URL 和 ID 至 MySQL 資料庫
+    save_url_to_mysql(thread_id, full_url)
 
     print(f"目前儲存的 Threads URL: {full_url}")  # 僅在伺服器端列印清單
     return render_template('success.html')  # 顯示成功訊息頁面
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
