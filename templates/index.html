@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>生成您的專屬島嶼🏝️</h1>
-    <form action="/submit" method="POST">
+    <form id="threadsForm" action="/submit" method="POST">
         <label for="thread_id">請輸入您的Threads ID: @</label>
         <input type="text" id="thread_id" name="thread_id" placeholder="DCT.Island" required>
         <button type="submit">提交</button>
@@ -20,6 +20,5 @@
             this.submit();  // 手動提交表單
         });
     </script>
-    
 </body>
 </html>
