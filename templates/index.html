@@ -8,9 +8,18 @@
 <body>
     <h1>生成您的專屬島嶼🏝️</h1>
     <form action="/submit" method="POST">
-        <label for="threads_id">請輸入您的Threads ID: @</label>
-        <input type="text" id="threads_id" name="threads_id" placeholder="DCT.Island" required>
+        <label for="thread_id">請輸入您的Threads ID: @</label>
+        <input type="text" id="thread_id" name="thread_id" placeholder="DCT.Island" required>
         <button type="submit">提交</button>
     </form>
+    <script>
+        document.getElementById('threadsForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // 停止表單預設行為
+            const threadId = document.getElementById('thread_id').value;
+            console.log("輸入的 thread_id:", threadId);
+            this.submit();  // 手動提交表單
+        });
+    </script>
+    
 </body>
 </html>
