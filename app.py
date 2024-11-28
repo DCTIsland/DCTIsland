@@ -15,11 +15,11 @@ THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
 # MySQL 資料庫設定
 DB_CONFIG = {
-    'host': "mysql-dctisland-dctisland.e.aivencloud.com",
-    'user': "avnadmin",
-    'password': "AVNS__ZRQ9r7irwHzDuVDgp6",
-    'database': "defaultdb",
-    'port': "12649" # 默認端口為 3306
+    'host': os.environ.get('DB_HOST', 'mysql-dctisland-dctisland.e.aivencloud.com'),
+    'user': os.environ.get('DB_USER', 'avnadmin'),
+    'password': os.environ.get('DB_PASSWORD', 'AVNS__ZRQ9r7irwHzDuVDgp6'),
+    'database': os.environ.get('DB_NAME', 'defaultdb'),
+    'port': int(os.environ.get('DB_PORT', 12649))
 }
 
 # 建立 MySQL 連接
@@ -81,6 +81,7 @@ def home():
 @app.route('/submit', methods=['POST'])
 def submit():
     thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
+    
     if not thread_id or not THREADS_ID_REGEX.match(thread_id):  # 使用正則表達式驗證
         return "無效的 Threads ID, 請確認格式正確！", 400
 
