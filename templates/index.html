@@ -12,13 +12,5 @@
         <input type="text" id="thread_id" name="thread_id" placeholder="DCT.Island" required>
         <button type="submit">提交</button>
     </form>
-    <script>
-        document.getElementById('threadsForm').addEventListener('submit', function(event) {
-            event.preventDefault();  // 停止表單預設行為
-            const threadId = document.getElementById('thread_id').value;
-            console.log("輸入的 thread_id:", threadId);
-            this.submit();  // 手動提交表單
-        });
-    </script>
 </body>
 </html>
