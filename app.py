@@ -15,10 +15,11 @@ THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
 # MySQL 資料庫設定
 DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'localhost'),
-    'user': os.environ.get('DB_USER', 'root'),
-    'password': os.environ.get('DB_PASSWORD', '20241126'),
-    'database': os.environ.get('DB_NAME', 'user_threads')
+    'host': os.environ.get('DB_HOST'),
+    'user': os.environ.get('DB_USER'),
+    'password': os.environ.get('DB_PASSWORD'),
+    'database': os.environ.get('DB_NAME'),
+    'port': os.environ.get('DB_PORT', 3306)  # 默認端口為 3306
 }
 
 # 建立 MySQL 連接
@@ -27,7 +28,8 @@ def get_db_connection():
         host=DB_CONFIG['host'],
         user=DB_CONFIG['user'],
         password=DB_CONFIG['password'],
-        database=DB_CONFIG['database']
+        database=DB_CONFIG['database'],
+        port=DB_CONFIG['port']
     )
 
 # 檢查 URL 是否有效
@@ -45,35 +47,35 @@ def is_url_accessible(url):
     except requests.RequestException:
         return False
 
-# 儲存 URL 和 ID 到 MySQL 資料庫
-def save_url_to_mysql(threads_id, url, replies_text=''):
+# 儲存 URL 和 ID 至 MySQL 資料庫
+def save_url_to_mysql(thread_id, url):
     connection = None
     cursor = None
     try:
-        # 建立資料庫連線
+        # 建立資料庫連接
         connection = get_db_connection()
         cursor = connection.cursor()
 
-        # 修改 SQL 插入語句，加入 replies_text 欄位
-        query = "INSERT INTO threads (thread_id, link, replies_text) VALUES (%s, %s, %s)"
-        cursor.execute(query, (threads_id, url, replies_text))
-        
+        # 插入資料到 threads 資料表
+        query = "INSERT INTO threads (thread_id, link) VALUES (%s, %s)"
+        cursor.execute(query, (thread_id, url))
+
         # 提交交易
         connection.commit()
-
-        print(f"URL 和 ID 已成功寫入資料庫: {threads_id}, {url}, {replies_text}")
+        print(f"URL 和 ID 已成功寫入資料庫: {thread_id}, {url}")
     except mysql.connector.Error as err:
         print(f"資料庫錯誤: {err}")
     finally:
-        if cursor is not None:
+        if cursor:
             cursor.close()
-        if connection is not None and connection.is_connected():
+        if connection:
             connection.close()
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# submit 路由處理表單提交
 @app.route('/submit', methods=['POST'])
 def submit():
     thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
