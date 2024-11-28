@@ -15,11 +15,11 @@ THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
 # MySQL 資料庫設定
 DB_CONFIG = {
-    'host': os.environ.get('DB_HOST'),
-    'user': os.environ.get('DB_USER'),
-    'password': os.environ.get('DB_PASSWORD'),
-    'database': os.environ.get('DB_NAME'),
-    'port': os.environ.get('DB_PORT', 3306)  # 默認端口為 3306
+    'host': "mysql-dctisland-dctisland.e.aivencloud.com",
+    'user': "avnadmin",
+    'password': "AVNS__ZRQ9r7irwHzDuVDgp6",
+    'database': "defaultdb",
+    'port': "12649" # 默認端口為 3306
 }
 
 # 建立 MySQL 連接
@@ -48,28 +48,30 @@ def is_url_accessible(url):
         return False
 
 # 儲存 URL 和 ID 至 MySQL 資料庫
-def save_url_to_mysql(thread_id, url):
+def save_url_to_mysql(threads_id, url, replies_text=''):
     connection = None
     cursor = None
     try:
-        # 建立資料庫連接
+        # 建立資料庫連線
         connection = get_db_connection()
         cursor = connection.cursor()
 
-        # 插入資料到 threads 資料表
-        query = "INSERT INTO threads (thread_id, link) VALUES (%s, %s)"
-        cursor.execute(query, (thread_id, url))
-
+        # 修改 SQL 插入語句，加入 replies_text 欄位
+        query = "INSERT INTO threads (thread_id, link, replies_text) VALUES (%s, %s, %s)"
+        cursor.execute(query, (threads_id, url, replies_text))
+        
         # 提交交易
         connection.commit()
-        print(f"URL 和 ID 已成功寫入資料庫: {thread_id}, {url}")
+
+        print(f"URL 和 ID 已成功寫入資料庫: {threads_id}, {url}, {replies_text}")
     except mysql.connector.Error as err:
         print(f"資料庫錯誤: {err}")
     finally:
-        if cursor:
+        if cursor is not None:
             cursor.close()
-        if connection:
+        if connection is not None and connection.is_connected():
             connection.close()
+
 
 @app.route('/')
 def home():
