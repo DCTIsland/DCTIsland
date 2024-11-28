@@ -80,23 +80,17 @@ def home():
 # submit 路由處理表單提交
 @app.route('/submit', methods=['POST'])
 def submit():
-    thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
-    
-    if not thread_id or not THREADS_ID_REGEX.match(thread_id):  # 使用正則表達式驗證
-        return "無效的 Threads ID, 請確認格式正確！", 400
+    thread_id = request.form.get('thread_id')
+    print(f"收到的 thread_id: {thread_id}")  # 日誌輸出
+    if not thread_id:  # 暫時去掉正則驗證
+        return "請輸入 Threads ID！", 400
 
-    # 自動拼接完整的 Threads URL
     full_url = THREADS_BASE_URL + thread_id
+    print(f"生成的 URL: {full_url}")  # 顯示生成的 URL
 
-    # 檢查 URL 是否存在並有效
-    if not is_url_accessible(full_url):
-        return f"生成的 URL 無效或不存在：{full_url}", 404
+    # 假設 URL 驗證成功
+    return render_template('success.html')
 
-    # 儲存 URL 和 ID 至 MySQL 資料庫
-    save_url_to_mysql(thread_id, full_url)
-
-    print(f"目前儲存的 Threads URL: {full_url}")  # 僅在伺服器端列印清單
-    return render_template('success.html')  # 顯示成功訊息頁面
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
