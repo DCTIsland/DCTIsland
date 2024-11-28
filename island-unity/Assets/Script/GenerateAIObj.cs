@@ -9,16 +9,15 @@ using UnityEngine.Networking;
 
 public class GenerateAIObj : MonoBehaviour
 {
-    string prompt = "";
+    public string prompt = "";
     string textToMeshID = "nejnwmcwvhcax9";
     int steps = 64;
     int cfg = 15;
     string invoice = "IN010300192332";
     string modelName;
-    int format = 0; //.FBX
+    string format = "FBX";
     string directoryPath = "Assets/Shap-E/Models";
-    bool postFlag;
-    int postProgress;
+    UnityEngine.Object newobj;
 
     IEnumerator Post(string url, string bodyJsonString)
     {
@@ -28,8 +27,6 @@ public class GenerateAIObj : MonoBehaviour
         request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
         yield return request.SendWebRequest();
-        postProgress = 1;
-        postFlag = false;
         if (request.result != UnityWebRequest.Result.Success)
         {
             Debug.Log("There was an error in generating the model. \nPlease check your invoice/order number and try again or check the troubleshooting section in the documentation for more information." + "\nInfo: " + request.result + "\nError Code: " + request.responseCode);
@@ -46,15 +43,20 @@ public class GenerateAIObj : MonoBehaviour
                 byte[] modelData = Convert.FromBase64String(request.downloadHandler.text);
                 File.WriteAllBytes($"Assets/Shap-E/Models/{modelName}.{format}", modelData);
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
+                //newobj = (UnityEngine.Object)
+                //AssetDatabase.Refresh();
                 //Selection.activeObject = (UnityEngine.Object)AssetDatabase.LoadAssetAtPath($"Assets/Shap-E/Models/{modelName}.{format}", typeof(UnityEngine.Object));
             }
         }
+
+        request.Dispose();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        this.StartCoroutine($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
+        Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
+        this.StartCoroutine(Post($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
     }
 
     // Update is called once per frame
