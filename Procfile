@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: bash build.sh && python app.py
