@@ -1,14 +1,7 @@
 import re
 import os
-import json
-import asyncio
 import requests
-import jmespath
 import mysql.connector
-from typing import Dict
-from playwright.async_api import async_playwright
-from parsel import Selector
-from nested_lookup import nested_lookup
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
 
@@ -16,6 +9,7 @@ app = Flask(__name__)
 
 # Threads 的基礎網址
 THREADS_BASE_URL = "https://www.threads.net/@"  # 修改為正確的網址
+
 # 定義合法的 Threads ID 格式：字母、數字、點、底線
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
@@ -53,51 +47,30 @@ def is_url_accessible(url):
     except requests.RequestException:
         return False
 
-def parse_thread(data: Dict) -> str:
-    """Parse Threads post JSON dataset for text content only"""
-    result = jmespath.search("post.caption.text", data)
-    return result
-
-async def scrape_thread_text(url: str) -> dict:
-    """爬取 Threads 帖子與回覆內容，只返回文本內容。"""
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch()
-        context = await browser.new_context(viewport={"width": 1920, "height": 1080})
-        page = await context.new_page()
-        await page.goto(url)
-        await page.wait_for_selector("[data-pressable-container=true]")
-        selector = Selector(await page.content())
-        hidden_datasets = selector.css('script[type="application/json"][data-sjs]::text').getall()
-
-        for hidden_dataset in hidden_datasets:
-            if '"ScheduledServerJS"' not in hidden_dataset or "thread_items" not in hidden_dataset:
-                continue
-            # 解析 JSON 資料
-            data = json.loads(hidden_dataset)
-            thread_items = nested_lookup("thread_items", data)
-            if not thread_items:
-                continue
-            # 擷取內容並返回
-            threads_text = [parse_thread(t) for thread in thread_items for t in thread]
-            return {
-                "thread_text": threads_text[0],
-                "replies_text": threads_text[1:],
-            }
-        raise ValueError("無法在頁面中找到 Threads 資料")
-
 # 儲存 URL 和 ID 至 MySQL 資料庫
-def save_url_to_mysql(thread_id, url):
-    """將 Threads ID 和 URL 儲存到 MySQL 資料庫。"""
-    connection = get_db_connection()
+def save_url_to_mysql(threads_id, url, replies_text=''):
+    connection = None
+    cursor = None
     try:
+        # 建立資料庫連線
+        connection = get_db_connection()
         cursor = connection.cursor()
-        query = "INSERT INTO threads (thread_id, link) VALUES (%s, %s)"
-        cursor.execute(query, (thread_id, url))
+
+        # 修改 SQL 插入語句，加入 replies_text 欄位
+        query = "INSERT INTO threads (thread_id, link, replies_text) VALUES (%s, %s, %s)"
+        cursor.execute(query, (threads_id, url, replies_text))
+        
+        # 提交交易
         connection.commit()
-        print(f"成功儲存：{thread_id} - {url}")
+
+        print(f"URL 和 ID 已成功寫入資料庫: {threads_id}, {url}, {replies_text}")
+    except mysql.connector.Error as err:
+        print(f"資料庫錯誤: {err}")
     finally:
-        cursor.close()
-        connection.close()
+        if cursor is not None:
+            cursor.close()
+        if connection is not None and connection.is_connected():
+            connection.close()
 
 
 @app.route('/')
@@ -107,28 +80,23 @@ def home():
 # submit 路由處理表單提交
 @app.route('/submit', methods=['POST'])
 def submit():
-    thread_id = request.form.get('thread_id')
-    if not thread_id or not THREADS_ID_REGEX.match(thread_id):
+    thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
+    
+    if not thread_id or not THREADS_ID_REGEX.match(thread_id):  # 使用正則表達式驗證
         return "無效的 Threads ID, 請確認格式正確！", 400
 
+    # 自動拼接完整的 Threads URL
     full_url = THREADS_BASE_URL + thread_id
 
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        thread_data = loop.run_until_complete(scrape_thread_text(full_url))
+    # 檢查 URL 是否存在並有效
+    if not is_url_accessible(full_url):
+        return f"生成的 URL 無效或不存在：{full_url}", 404
 
-        # 印出爬取結果到日誌，不存入資料庫
-        print(f"主帖內容: {thread_data['thread_text']}")
-        print(f"回覆內容: {thread_data['replies_text']}")
+    # 儲存 URL 和 ID 至 MySQL 資料庫
+    save_url_to_mysql(thread_id, full_url)
 
-        # 儲存 thread_id 和 URL 到 MySQL
-        save_url_to_mysql(thread_id, full_url)
-
-    except Exception as e:
-        return f"爬取或儲存時發生錯誤：{e}", 500
-
-    return render_template('success.html')
+    print(f"目前儲存的 Threads URL: {full_url}")  # 僅在伺服器端列印清單
+    return render_template('success.html')  # 顯示成功訊息頁面
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
