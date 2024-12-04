@@ -3,13 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEditor;
 
+//要怎麼脫離assetdatase啊
 
 public class GenerateAIObj : MonoBehaviour
 {
     public string prompt = "";
+    public Material vertex;
     string textToMeshID = "nejnwmcwvhcax9";
     int steps = 64;
     int cfg = 15;
@@ -17,7 +21,31 @@ public class GenerateAIObj : MonoBehaviour
     string modelName;
     string format = "FBX";
     string directoryPath = "Assets/Shap-E/Models";
-    UnityEngine.Object newobj;
+
+    void OverwriteCheck()
+    {
+        string filePath = Path.Combine(directoryPath, modelName);
+        int suffixNumber = 1;
+
+        if (modelName[modelName.Length - 2] == '_')
+            while (File.Exists(filePath + "." + format))
+            {
+                modelName = modelName.Remove(modelName.Length - 1, 1) + suffixNumber;
+                filePath = Path.Combine(directoryPath, modelName);
+                suffixNumber++;
+            }
+
+        if (File.Exists(filePath + "." + format))
+            modelName += "_1";
+
+        if (modelName[modelName.Length - 2] == '_')
+            while (File.Exists(filePath + "." + format))
+            {
+                modelName = modelName.Remove(modelName.Length - 1, 1) + suffixNumber;
+                filePath = Path.Combine(directoryPath, modelName);
+                suffixNumber++;
+            }
+    }
 
     IEnumerator Post(string url, string bodyJsonString)
     {
@@ -41,11 +69,18 @@ public class GenerateAIObj : MonoBehaviour
             else
             {
                 byte[] modelData = Convert.FromBase64String(request.downloadHandler.text);
-                File.WriteAllBytes($"Assets/Shap-E/Models/{modelName}.{format}", modelData);
+                string filePath = Path.Combine(Application.persistentDataPath, $"{modelName}.{format}");
+
+                File.WriteAllBytes(filePath, modelData);
+                File.WriteAllBytes($"Assets/Resources/Models/{modelName}.{format}", modelData);
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
-                //newobj = (UnityEngine.Object)
-                //AssetDatabase.Refresh();
-                //Selection.activeObject = (UnityEngine.Object)AssetDatabase.LoadAssetAtPath($"Assets/Shap-E/Models/{modelName}.{format}", typeof(UnityEngine.Object));
+                AssetDatabase.Refresh();
+
+                GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
+                GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
+                gameObject.name = modelName;
+                gameObject.GetComponent<MeshRenderer>().material = vertex;
+                Debug.Log("generate obj " + $"{modelName}");
             }
         }
 
@@ -55,6 +90,12 @@ public class GenerateAIObj : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        prompt = Regex.Replace(prompt, @"\\(?!n|"")", "");
+        prompt = Regex.Replace(prompt, "(?<!n)\n", "\\n");
+        prompt = Regex.Replace(prompt, "(?<!\\\\)\"", "\\\"");
+        modelName = prompt.Replace(" ", "_");
+
+        OverwriteCheck();
         Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
         this.StartCoroutine(Post($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
     }
