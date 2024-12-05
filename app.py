@@ -1,104 +1,132 @@
 import re
 import os
+import json
+import openai
+import asyncio
 import requests
-import mysql.connector
+import jmespath
+from firebase_admin import credentials, initialize_app, db
+from typing import Dict
+from playwright.async_api import async_playwright
+from parsel import Selector
+from nested_lookup import nested_lookup
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 # Threads 的基礎網址
-THREADS_BASE_URL = "https://www.threads.net/@"  # 修改為正確的網址
-
-# 定義合法的 Threads ID 格式：字母、數字、點、底線
+THREADS_BASE_URL = "https://www.threads.net/@"
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
-# MySQL 資料庫設定
-DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'mysql-dctisland-dctisland.e.aivencloud.com'),
-    'user': os.environ.get('DB_USER', 'avnadmin'),
-    'password': os.environ.get('DB_PASSWORD', 'AVNS__ZRQ9r7irwHzDuVDgp6'),
-    'database': os.environ.get('DB_NAME', 'defaultdb'),
-    'port': int(os.environ.get('DB_PORT', 12649))
-}
+# OpenAI API 設定
+openai.api_key = "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"
 
-# 建立 MySQL 連接
-def get_db_connection():
-    return mysql.connector.connect(
-        host=DB_CONFIG['host'],
-        user=DB_CONFIG['user'],
-        password=DB_CONFIG['password'],
-        database=DB_CONFIG['database'],
-        port=DB_CONFIG['port']
-    )
+# Firebase 初始化
+FIREBASE_CREDENTIALS = "dctisland-24ab2-firebase-adminsdk-j4311-d861b190b4.json"  # 替換成你的 Firebase JSON 憑證路徑
+FIREBASE_DATABASE_URL = 'https://dctisland-24ab2-default-rtdb.asia-southeast1.firebasedatabase.app/'  # 替換為你的 Firebase Realtime Database URL
+
+cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+initialize_app(cred, {'databaseURL': FIREBASE_DATABASE_URL})
 
 # 檢查 URL 是否有效
 def is_url_accessible(url):
     try:
         response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # 檢查是否有 Threads 貼文的特定元素（例如標題）
-            if soup.find("meta", {"property": "og:title"}):  # 假設有這樣的標籤
-                return True
-            # 沒有特徵內容，可能是錯誤頁面
-            return False
-        return False
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        return bool(soup.find("meta", {"property": "og:title"}))
     except requests.RequestException:
         return False
 
-# 儲存 URL 和 ID 至 MySQL 資料庫
-def save_url_to_mysql(threads_id, url, replies_text=''):
-    connection = None
-    cursor = None
+# 儲存 URL 和 ID 至 Firebase
+def save_url_to_firebase(threads_id, url, topics=''):
     try:
-        # 建立資料庫連線
-        connection = get_db_connection()
-        cursor = connection.cursor()
+        ref = db.reference('threads')
+        data = {
+            "thread_id": threads_id,
+            "link": url,
+            "topics": topics
+        }
+        ref.push(data)  # 使用 push 方法新增一筆資料
+        print(f"已成功儲存至 Firebase: {threads_id}, {url}, {topics}")
+    except Exception as e:
+        print(f"儲存到 Firebase 失敗: {e}")
 
-        # 修改 SQL 插入語句，加入 replies_text 欄位
-        query = "INSERT INTO threads (thread_id, link, replies_text) VALUES (%s, %s, %s)"
-        cursor.execute(query, (threads_id, url, replies_text))
-        
-        # 提交交易
-        connection.commit()
+def parse_thread(data: Dict) -> str:
+    """Parse Threads post JSON dataset for text content only"""
+    result = jmespath.search("post.caption.text", data)
+    return result
 
-        print(f"URL 和 ID 已成功寫入資料庫: {threads_id}, {url}, {replies_text}")
-    except mysql.connector.Error as err:
-        print(f"資料庫錯誤: {err}")
-    finally:
-        if cursor is not None:
-            cursor.close()
-        if connection is not None and connection.is_connected():
-            connection.close()
+async def scrape_thread_text(url: str) -> dict:
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch()
+        context = await browser.new_context(viewport={"width": 1920, "height": 1080})
+        page = await context.new_page()
+        await page.goto(url)
+        await page.wait_for_selector("[data-pressable-container=true]")
+        selector = Selector(await page.content())
+        hidden_datasets = selector.css('script[type="application/json"][data-sjs]::text').getall()
 
+        for hidden_dataset in hidden_datasets:
+            if '"ScheduledServerJS"' not in hidden_dataset or "thread_items" not in hidden_dataset:
+                continue
+            data = json.loads(hidden_dataset)
+            thread_items = nested_lookup("thread_items", data)
+            if not thread_items:
+                continue
+            threads_text = [parse_thread(t) for thread in thread_items for t in thread]
+            combined_text = ' '.join(threads_text)
+            if len(combined_text) > 1200:
+                combined_text = combined_text[:200]
+            
+            return {
+                "thread_text": combined_text,
+                "replies_text": threads_text[1:],
+            }
+        raise ValueError("無法在頁面中找到 Threads 資料")
+
+# 用 GPT-3.5-turbo 分析頁面內容並提取三個主題
+def analyze_with_gpt(text):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an assistant that extracts key topics."},
+                {"role": "user", "content": f"針對文章結果歸納出三個關鍵詞，並想像成相關的具體物件，最終只印出三個英文單詞:\n{text}"}
+            ],
+            max_tokens=400
+        )
+        topics = response['choices'][0]['message']['content'].strip()
+        return topics
+    except Exception as e:
+        print(f"GPT 分析失敗: {e}")
+        return "分析失敗"
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# submit 路由處理表單提交
 @app.route('/submit', methods=['POST'])
-def submit():
-    thread_id = request.form.get('thread_id')  # 從表單取得使用者輸入的 Threads ID
-    
-    if not thread_id or not THREADS_ID_REGEX.match(thread_id):  # 使用正則表達式驗證
+async def submit():
+    thread_id = request.form.get('thread_id')
+    if not thread_id or not THREADS_ID_REGEX.match(thread_id):
         return "無效的 Threads ID, 請確認格式正確！", 400
 
-    # 自動拼接完整的 Threads URL
     full_url = THREADS_BASE_URL + thread_id
-
-    # 檢查 URL 是否存在並有效
     if not is_url_accessible(full_url):
         return f"生成的 URL 無效或不存在：{full_url}", 404
 
-    # 儲存 URL 和 ID 至 MySQL 資料庫
-    save_url_to_mysql(thread_id, full_url)
+    page_title = await scrape_thread_text(full_url)
+    topics = analyze_with_gpt(page_title)
+    # topics = ""
+    scraped_text = page_title['thread_text']
+    save_url_to_firebase(thread_id, full_url, topics=topics)
 
-    print(f"目前儲存的 Threads URL: {full_url}")  # 僅在伺服器端列印清單
-    return render_template('success.html')  # 顯示成功訊息頁面
+    print(f"儲存的 Threads URL 和主題: {full_url}, {topics}")
+    print(f"Scraped text: {scraped_text}")
+    return render_template('success.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
