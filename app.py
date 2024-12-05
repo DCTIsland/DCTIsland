@@ -32,7 +32,7 @@ FIREBASE_DATABASE_URL = 'https://dctisland-24ab2-default-rtdb.asia-southeast1.fi
 service_account_info = json.loads(firebase_service_account)
 cred = credentials.Certificate(service_account_info)
 firebase_admin.initialize_app(cred)
-initialize_app(cred, {'databaseURL': FIREBASE_DATABASE_URL})
+# initialize_app(cred, {'databaseURL': FIREBASE_DATABASE_URL})
 
 # 檢查 URL 是否有效
 def is_url_accessible(url):
