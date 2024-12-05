@@ -25,14 +25,17 @@ THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 openai.api_key = "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"
 
 # Firebase 初始化
-# FIREBASE_CREDENTIALS = "dctisland-24ab2-firebase-adminsdk-j4311-d861b190b4.json"  # 替換成你的 Firebase JSON 憑證路徑
-firebase_service_account = os.environ['FIREBASE_SERVICE_ACCOUNT']
-FIREBASE_DATABASE_URL = 'https://dctisland-24ab2-default-rtdb.asia-southeast1.firebasedatabase.app/'  # 替換為你的 Firebase Realtime Database URL
+firebase_service_account = os.environ.get('FIREBASE_SERVICE_ACCOUNT')  # 從環境變數中取得憑證
+if not firebase_service_account:
+    raise ValueError("FIREBASE_SERVICE_ACCOUNT 環境變數未設置，請在 Zeabur 上設定此環境變數")
 
-service_account_info = json.loads(firebase_service_account)
-cred = credentials.Certificate(service_account_info)
-firebase_admin.initialize_app(cred)
-# initialize_app(cred, {'databaseURL': FIREBASE_DATABASE_URL})
+service_account_info = json.loads(firebase_service_account)  # 將 JSON 字符串轉為字典格式
+cred = credentials.Certificate(service_account_info)  # 建立憑證物件
+firebase_database_url = os.environ.get('FIREBASE_DATABASE_URL')
+
+# 防止多次初始化 Firebase
+if not firebase_admin._apps:
+    initialize_app(cred, {'databaseURL': firebase_database_url})
 
 # 檢查 URL 是否有效
 def is_url_accessible(url):
