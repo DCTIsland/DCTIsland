@@ -6,7 +6,7 @@ import asyncio
 import requests
 import jmespath
 import firebase_admin
-from firebase_admin import credentials
+from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, db
 from typing import Dict
 from playwright.async_api import async_playwright
@@ -22,7 +22,10 @@ THREADS_BASE_URL = "https://www.threads.net/@"
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
 # OpenAI API 設定
-openai.api_key = "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"
+openai.api_key = "sk-svcacct-b1_yCLlVdx9pqzRkOfDMmPb0r8keXxv0dczrdmetOfIqdsa1rWa3gahSVJbtA5-dT3BlbkFJavWVSKxkkUb377UIOA8ThRtgh33CmebUajJCNp02uk2cotZRyh-9yBiPjjOSsxUA"
+
+# 加載 .env 文件中的環境變數
+load_dotenv()
 
 # Firebase 初始化
 firebase_service_account = os.environ.get('FIREBASE_SERVICE_ACCOUNT')  # 從環境變數中取得憑證
@@ -85,7 +88,7 @@ async def scrape_thread_text(url: str) -> dict:
                 continue
             threads_text = [parse_thread(t) for thread in thread_items for t in thread]
             combined_text = ' '.join(threads_text)
-            if len(combined_text) > 1200:
+            if len(combined_text) > 200:
                 combined_text = combined_text[:200]
             
             return {
