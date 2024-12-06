@@ -21,24 +21,38 @@ app = Flask(__name__)
 THREADS_BASE_URL = "https://www.threads.net/@"
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
-# OpenAI API 設定
-openai.api_key = "sk-svcacct-b1_yCLlVdx9pqzRkOfDMmPb0r8keXxv0dczrdmetOfIqdsa1rWa3gahSVJbtA5-dT3BlbkFJavWVSKxkkUb377UIOA8ThRtgh33CmebUajJCNp02uk2cotZRyh-9yBiPjjOSsxUA"
-
 # 加載 .env 文件中的環境變數
 load_dotenv()
 
-# Firebase 初始化
-firebase_service_account = os.environ.get('FIREBASE_SERVICE_ACCOUNT')  # 從環境變數中取得憑證
-if not firebase_service_account:
-    raise ValueError("FIREBASE_SERVICE_ACCOUNT 環境變數未設置，請在 Zeabur 上設定此環境變數")
+# OpenAI API 設定
+# openai.api_key = os.environ.get('OPEN_API_KEY')
 
-service_account_info = json.loads(firebase_service_account)  # 將 JSON 字符串轉為字典格式
-cred = credentials.Certificate(service_account_info)  # 建立憑證物件
-firebase_database_url = os.environ.get('FIREBASE_DATABASE_URL')
+# 加載環境變數
+firebase_service_account = os.getenv('FIREBASE_SERVICE_ACCOUNT')
+firebase_credentials_path = os.getenv('FIREBASE_SERVICE_ACCOUNT_PATH')
 
-# 防止多次初始化 Firebase
-if not firebase_admin._apps:
-    initialize_app(cred, {'databaseURL': firebase_database_url})
+try:
+    if firebase_service_account:
+        # 從環境變數中讀取憑證
+        service_account_info = json.loads(firebase_service_account)
+        cred = credentials.Certificate(service_account_info)
+    elif firebase_credentials_path:
+        # 從文件中讀取憑證
+        if not os.path.exists(firebase_credentials_path):
+            raise FileNotFoundError(f"Firebase 憑證文件未找到：{firebase_credentials_path}")
+        cred = credentials.Certificate(firebase_credentials_path)
+    else:
+        raise ValueError("Firebase 憑證未設置，請檢查環境變數或文件路徑")
+
+    # 初始化 Firebase
+    if not firebase_admin._apps:
+        initialize_app(cred, {'databaseURL': os.getenv('FIREBASE_DATABASE_URL')})
+    print("Firebase 初始化成功！")
+
+except json.JSONDecodeError as e:
+    raise ValueError(f"FIREBASE_SERVICE_ACCOUNT JSON 格式錯誤：{e}")
+except Exception as e:
+    raise ValueError(f"Firebase 初始化失敗：{e}")
 
 # 檢查 URL 是否有效
 def is_url_accessible(url):
@@ -97,22 +111,22 @@ async def scrape_thread_text(url: str) -> dict:
             }
         raise ValueError("無法在頁面中找到 Threads 資料")
 
-# 用 GPT-3.5-turbo 分析頁面內容並提取三個主題
-def analyze_with_gpt(text):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an assistant that extracts key topics."},
-                {"role": "user", "content": f"針對文章結果歸納出三個關鍵詞，並想像成相關的具體物件，最終只印出三個英文單詞:\n{text}"}
-            ],
-            max_tokens=400
-        )
-        topics = response['choices'][0]['message']['content'].strip()
-        return topics
-    except Exception as e:
-        print(f"GPT 分析失敗: {e}")
-        return "分析失敗"
+# # 用 GPT-3.5-turbo 分析頁面內容並提取三個主題
+# def analyze_with_gpt(text):
+#     try:
+#         response = openai.ChatCompletion.create(
+#             model="gpt-3.5-turbo",
+#             messages=[
+#                 {"role": "system", "content": "You are an assistant that extracts key topics."},
+#                 {"role": "user", "content": f"針對文章結果歸納出三個關鍵詞，並想像成相關的具體物件，最終只印出三個英文單詞:\n{text}"}
+#             ],
+#             max_tokens=400
+#         )
+#         topics = response['choices'][0]['message']['content'].strip()
+#         return topics
+#     except Exception as e:
+#         print(f"GPT 分析失敗: {e}")
+#         return "分析失敗"
 
 @app.route('/')
 def home():
@@ -129,8 +143,8 @@ async def submit():
         return f"生成的 URL 無效或不存在：{full_url}", 404
 
     page_title = await scrape_thread_text(full_url)
-    topics = analyze_with_gpt(page_title)
-    # topics = ""
+    # topics = analyze_with_gpt(page_title)
+    topics = ""
     scraped_text = page_title['thread_text']
     save_url_to_firebase(thread_id, full_url, topics=topics)
 
