@@ -21,11 +21,11 @@ app = Flask(__name__)
 THREADS_BASE_URL = "https://www.threads.net/@"
 THREADS_ID_REGEX = re.compile(r'^[a-zA-Z0-9._]+$')
 
-# OpenAI API 設定
-openai.api_key = "sk-svcacct-b1_yCLlVdx9pqzRkOfDMmPb0r8keXxv0dczrdmetOfIqdsa1rWa3gahSVJbtA5-dT3BlbkFJavWVSKxkkUb377UIOA8ThRtgh33CmebUajJCNp02uk2cotZRyh-9yBiPjjOSsxUA"
-
 # 加載 .env 文件中的環境變數
 load_dotenv()
+
+# OpenAI API 設定
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # Firebase 初始化
 firebase_service_account = os.environ.get('FIREBASE_SERVICE_ACCOUNT')  # 從環境變數中取得憑證
