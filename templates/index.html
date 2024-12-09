@@ -10,10 +10,10 @@
 <body>
     <div class="container">
         <h1>Generate your own island</h1>
-        <form class="form">
+        <form class="form" id="threadsForm" action="/submit" method="POST">
             <div class="input-container">
                 <label for="thread_id">@</label>
-                <input type="text" id="thread_id" placeholder="Input your Threads ID">
+                <input type="text" id="thread_id" name="thread_id" placeholder="Input your Threads ID" required>
             </div>
             <button type="submit" class="submit-btn">Submit</button>
         </form>
