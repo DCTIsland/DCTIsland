@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Island</title>
+    <title>Generate Your island</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>生成您的專屬島嶼🏝️</h1>
-    <form id="threadsForm" action="/submit" method="POST">
-        <label for="thread_id">請輸入您的Threads ID: @</label>
-        <input type="text" id="thread_id" name="thread_id" placeholder="DCT.Island" required>
-        <button type="submit">提交</button>
-    </form>
+    <div class="container">
+        <h1>Generate your own island</h1>
+        <form class="form">
+            <div class="input-container">
+                <label for="thread_id">@</label>
+                <input type="text" id="thread_id" placeholder="Input your Threads ID">
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+        <a href="#" class="footer-link">Already have one></a>
+    </div>
 </body>
 </html>
