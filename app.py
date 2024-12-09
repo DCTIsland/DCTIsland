@@ -106,7 +106,7 @@ def analyze_with_gpt(text):
                 {"role": "system", "content": "You are an assistant that extracts key topics."},
                 {"role": "user", "content": f"針對文章結果歸納出三個關鍵詞，並想像成相關的具體物件，最終只印出三個英文單詞:\n{text}"}
             ],
-            max_tokens=400
+            max_tokens=600
         )
         topics = response['choices'][0]['message']['content'].strip()
         return topics
