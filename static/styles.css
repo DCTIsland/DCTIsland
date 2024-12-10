@@ -84,6 +84,24 @@ h1 {
     background-color: #a94539;
 }
 
+.submit-btn2 {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    font-family: 'Nova Mono', monospace;
+    background-color: #c95b4a;
+    color: #fff;
+    border: none;
+    border-radius: 80px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn2:hover {
+    background-color: #a94539;
+}
+
 /* 底部連結 */
 .footer-link {
     display: block;
@@ -96,4 +114,37 @@ h1 {
 .footer-link:hover {
     text-decoration: underline;
 }
+
+/* HTML: <div class="loader"></div> */
+.loader {
+    display: inline-grid;
+    width: 80px;
+    aspect-ratio: 2;
+    box-shadow: 0 5px #574951;
+    overflow: hidden;
+  }
+  .loader:before,
+  .loader:after {
+    content: "";
+    grid-area: 1/1;
+    margin: 0 25%;
+    background: #c95b4a;
+    clip-path: polygon(97.55% 65.45%,50% 100%,2.45% 65.45%,20.61% 9.55%,79.39% 9.55%);
+    transform-origin: bottom;
+    animation: 
+      l8-0 .5s linear infinite,
+      l8-1  4s steps(8) infinite;
+  }
+  .loader:after {
+    animation-direction: reverse;
+    animation-delay: 0s, -1.5s;
+  }
+  @keyframes l8-0 {
+    0%{rotate: -36deg}
+    to{rotate:  36deg}
+  }
+  @keyframes l8-1 {
+    0%{translate: -232% 0}
+    to{translate:  232% 0}
+  }
 
