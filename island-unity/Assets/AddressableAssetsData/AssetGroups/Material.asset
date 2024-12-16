@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Material
+  m_EditorClassIdentifier: 
+  m_GroupName: Material
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 8d24b2830a8ebcb45bcf326b68e395ae
+  m_SerializeEntries:
+  - m_GUID: 0b936cbce16e515438047a2675a59692
+    m_Address: Assets/Art/Material/Vertex Color.mat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c067249e843b47d40bd934b98a6c89d3, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e614f6b9dee3be447a153fe296db9731, type: 2}
+    - {fileID: 11400000, guid: 4557374ae752e2b4bbcd313e376ff6cd, type: 2}

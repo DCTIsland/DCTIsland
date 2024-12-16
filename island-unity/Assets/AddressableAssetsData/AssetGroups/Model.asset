@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Model
+  m_EditorClassIdentifier: 
+  m_GroupName: Model
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 63abd46565aeaf8469029530b48f7ada
+  m_SerializeEntries:
+  - m_GUID: 180f52e89f6463540bdea274e12725e2
+    m_Address: Assets/Art/Model/Example Chair.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1ccd9d8069b4894ea7d8a2e0ad46b7e
+    m_Address: Assets/Art/Model/Example Sword.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c067249e843b47d40bd934b98a6c89d3, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2e9cd8b8de00e3243958d58c0d78677c, type: 2}
+    - {fileID: 11400000, guid: bddd47b4dd1338c4fbf9486f369afa7f, type: 2}
