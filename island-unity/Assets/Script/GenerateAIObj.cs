@@ -6,9 +6,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEditor;
 
-//要怎麼脫離assetdatase啊
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class GenerateAIObj : MonoBehaviour
 {
@@ -20,8 +21,29 @@ public class GenerateAIObj : MonoBehaviour
     string invoice = "IN010300192332";
     string modelName;
     string format = "FBX";
-    string directoryPath = "Assets/Shap-E/Models";
+    string directoryPath = "Assets/Art/Model";
 
+    // Start is called before the first frame update
+    void Start()
+    {
+        promptCheck(prompt);
+        modelName = prompt.Replace(" ", "_");
+        OverwriteCheck();
+        Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
+        this.StartCoroutine(Post($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    void promptCheck(string prompt){
+        prompt = Regex.Replace(prompt, @"\\(?!n|"")", "");
+        prompt = Regex.Replace(prompt, "(?<!n)\n", "\\n");
+        prompt = Regex.Replace(prompt, "(?<!\\\\)\"", "\\\"");
+    }
     void OverwriteCheck()
     {
         string filePath = Path.Combine(directoryPath, modelName);
@@ -72,37 +94,21 @@ public class GenerateAIObj : MonoBehaviour
                 string filePath = Path.Combine(Application.persistentDataPath, $"{modelName}.{format}");
 
                 File.WriteAllBytes(filePath, modelData);
-                File.WriteAllBytes($"Assets/Resources/Models/{modelName}.{format}", modelData);
+                File.WriteAllBytes($"{directoryPath}/{modelName}.{format}", modelData);
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
+                
+                #if UNITY_EDITOR
                 AssetDatabase.Refresh();
+                #endif
 
-                GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
-                GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
-                gameObject.name = modelName;
-                gameObject.GetComponent<MeshRenderer>().material = vertex;
-                Debug.Log("generate obj " + $"{modelName}");
+                // GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
+                // GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
+                // gameObject.name = modelName;
+                // gameObject.GetComponent<MeshRenderer>().material = vertex;
+                // Debug.Log("generate obj " + $"{modelName}");
             }
         }
 
         request.Dispose();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        prompt = Regex.Replace(prompt, @"\\(?!n|"")", "");
-        prompt = Regex.Replace(prompt, "(?<!n)\n", "\\n");
-        prompt = Regex.Replace(prompt, "(?<!\\\\)\"", "\\\"");
-        modelName = prompt.Replace(" ", "_");
-
-        OverwriteCheck();
-        Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
-        this.StartCoroutine(Post($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

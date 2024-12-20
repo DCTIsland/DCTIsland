@@ -27,6 +27,41 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 600282bb4a99e9e4cb1a0f6e355a51a7
+    m_Address: Assets/Art/Model/shoe.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b7ac9a02e9b7624bad45676dc976aa4
+    m_Address: Assets/Art/Model/keyboard.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e52a089abb155a4fa1694943e3ca18e
+    m_Address: Assets/Art/Model/Example Table.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ddc3c97cb945e149a6df716094718dd
+    m_Address: Assets/Art/Model/window.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43d866b5405bfa34f96db80a1a65f321
+    m_Address: Assets/Art/Model/woolen_beanie_hat.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 309e33f2770c22b43882a42aad82e63e
+    m_Address: Assets/Art/Model/cat.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f45a74175eeb9a84d9a57b803370eaf5
+    m_Address: Assets/Art/Model/green_pencil.FBX
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c067249e843b47d40bd934b98a6c89d3, type: 2}
   m_SchemaSet:
