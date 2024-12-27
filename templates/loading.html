@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Game</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+  <script src="/static/sketch.js"></script>
+</head>
+<body>
+  <main class="container" action="/loading" method="POST">
+    <script src="sketch.js"></script>
+  </main>
+  <script>
+    // 自動跳轉到 /process
+    document.addEventListener('DOMContentLoaded', () => {
+        const threadId = "{{ thread_id }}"; // 從後端傳入的 thread_id
+        setTimeout(() => {
+            window.location.href = `/process?thread_id=${encodeURIComponent(threadId)}`;
+        }, 3000); // 等待 3 秒
+    });
+  </script>
+</body>
+</html>

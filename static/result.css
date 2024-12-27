@@ -1,0 +1,99 @@
+/* Resetting margins and paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nova Mono', monospace;
+    background-color: #2c2c2c;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 10px;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background-color: #333;
+    border-radius: 8px;
+}
+
+.header {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.analysis-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.user-id {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+.results {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    padding: 0 10px;
+}
+
+.result-item {
+    width: 45%;
+    text-align: left;
+}
+
+.result-item h2 {
+    margin-bottom: 10px;
+}
+
+.result-item ul {
+    margin-top: 10px;
+    list-style: none;
+    padding: 0;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 40px; /* 將原來的 20px 增加到 40px */
+}
+
+.index-button {
+    font-family: 'Nova Mono', monospace;
+    background-color: #e63946;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.index-button:hover {
+    background-color: #d62839;
+}
+
