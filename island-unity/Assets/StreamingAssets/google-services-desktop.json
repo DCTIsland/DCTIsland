@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "510348230149",
+    "firebase_url": "https://dctdb-8c8ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "dctdb-8c8ad",
+    "storage_bucket": "dctdb-8c8ad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510348230149:android:ddc1b91a1716652084666c",
+        "android_client_info": {
+          "package_name": "National.Chengchi.University"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnsWMeg6w1aO4GOzXkEbLGF_TCJhBazrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
