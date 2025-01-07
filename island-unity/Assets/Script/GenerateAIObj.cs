@@ -8,8 +8,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
 
-//要怎麼脫離assetdatase啊
-
 public class GenerateAIObj : MonoBehaviour
 {
     public string prompt = "";
@@ -20,7 +18,7 @@ public class GenerateAIObj : MonoBehaviour
     string invoice = "IN010300192332";
     string modelName;
     string format = "FBX";
-    string directoryPath = "Assets/Shap-E/Models";
+    string directoryPath = "Assets/Resources/Models";
 
     void OverwriteCheck()
     {
@@ -80,6 +78,7 @@ public class GenerateAIObj : MonoBehaviour
                 GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
                 gameObject.name = modelName;
                 gameObject.GetComponent<MeshRenderer>().material = vertex;
+                //gameObject.AddComponent<Rigidbody>();
                 Debug.Log("generate obj " + $"{modelName}");
             }
         }
