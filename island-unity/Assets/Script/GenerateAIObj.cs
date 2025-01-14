@@ -12,7 +12,7 @@ public class GenerateAIObj : MonoBehaviour
 {
     public string prompt = "";
     public Material vertex;
-    string textToMeshID = "nejnwmcwvhcax9";
+    string shapEID = "nejnwmcwvhcax9";
     int steps = 64;
     int cfg = 15;
     string invoice = "IN010300192332";
@@ -45,7 +45,7 @@ public class GenerateAIObj : MonoBehaviour
             }
     }
 
-    IEnumerator Post(string url, string bodyJsonString)
+    IEnumerator PostShapE(string url, string bodyJsonString)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
@@ -74,17 +74,32 @@ public class GenerateAIObj : MonoBehaviour
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
                 AssetDatabase.Refresh();
 
-                GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
-                GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
-                gameObject.name = modelName;
-                gameObject.GetComponent<MeshRenderer>().material = vertex;
-                //gameObject.AddComponent<Rigidbody>();
+                // load
+                // GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
+                // GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
+                // gameObject.name = modelName;
+                // gameObject.GetComponent<MeshRenderer>().material = vertex;
+                // gameObject.AddComponent<Rigidbody>();
                 Debug.Log("generate obj " + $"{modelName}");
             }
         }
 
         request.Dispose();
     }
+
+    void GenAIobj()
+    {
+        prompt = Regex.Replace(prompt, @"\\(?!n|"")", "");
+        prompt = Regex.Replace(prompt, "(?<!n)\n", "\\n");
+        prompt = Regex.Replace(prompt, "(?<!\\\\)\"", "\\\"");
+        modelName = prompt.Replace(" ", "_");
+
+        OverwriteCheck();
+        Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
+        this.StartCoroutine(PostShapE($"https://{shapEID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
+    }
+
+    void LoadIsland(){}
 
     // Start is called before the first frame update
     void Start()
@@ -96,7 +111,7 @@ public class GenerateAIObj : MonoBehaviour
 
         OverwriteCheck();
         Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
-        this.StartCoroutine(Post($"https://{textToMeshID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
+        this.StartCoroutine(PostShapE($"https://{shapEID}-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
     }
 
     // Update is called once per frame
