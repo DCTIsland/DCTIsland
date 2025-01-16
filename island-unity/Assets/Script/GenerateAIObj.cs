@@ -7,8 +7,6 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
-using Unity.VisualScripting;
-using UnityEngine.UIElements;
 
 public class GenerateAIObj : MonoBehaviour
 {
@@ -35,15 +33,14 @@ public class GenerateAIObj : MonoBehaviour
     public GameObject[] iceObjList;
     public GameObject[] lavaObjList;
 
-    [Header("Island set")]
+    [Header("Island set:")]
     public string thread_id;
     public string prompt;
     public IslandType islandBase;
     public int[] islandObj;
 
-    Dictionary<IslandType, Vector2> islandMap;
-    List<Vector2> islansBorder = new List<Vector2> { };
-    Dictionary<IslandType, List<Vector2>> islandNext;
+    Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>(){};
+    Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>(){};
 
     void OverwriteCheck()
     {
@@ -114,19 +111,19 @@ public class GenerateAIObj : MonoBehaviour
 
     void initIslandMap()
     {
-        islandMap.Add(IslandType.concrete, new Vector2(0, 0));
-        islandMap.Add(IslandType.desert, new Vector2(0, 2));
-        islandMap.Add(IslandType.grass, new Vector2(0, -2));
-        islandMap.Add(IslandType.ice, new Vector2(-1, 1));
-        islandMap.Add(IslandType.lava, new Vector2(-1, -1));
+        islandMap.Add(new Vector2(0, 0), IslandType.concrete);
+        islandMap.Add(new Vector2(1, -1), IslandType.concrete);
+        islandMap.Add(new Vector2(-1, -1), IslandType.concrete);
+        islandMap.Add(new Vector2(2, 0), IslandType.desert);
+        islandMap.Add(new Vector2(-2, 0), IslandType.grass);
+        islandMap.Add(new Vector2(1, 1), IslandType.ice);
+        islandMap.Add(new Vector2(-1, 1), IslandType.lava);
 
-        islansBorder.AddRange(new List<Vector3>() { new Vector2(0, 0), new Vector2(0, 2), new Vector2(0, -2), new Vector2(-1, 1), new Vector2(-1, -1) });
-
-        islandNext.Add(IslandType.concrete, new List<Vector2>() { new Vector2(1, 1), new Vector2(1, -1) });
-        islandNext.Add(IslandType.desert, new List<Vector2>() { new Vector2(1, 3), new Vector2(0, 4), new Vector2(-1, 3) });
-        islandNext.Add(IslandType.grass, new List<Vector2>() { new Vector2(1, -3), new Vector2(0, -4), new Vector2(-1, -3) });
-        islandNext.Add(IslandType.ice, new List<Vector2>() { new Vector2(-1, 3), new Vector2(-2, 2), new Vector2(-2, 0) });
-        islandNext.Add(IslandType.lava, new List<Vector2>() { new Vector2(-1, -3), new Vector2(-2, -2), new Vector2(-2, 0) });
+        islandNext.Add(IslandType.concrete, new List<Vector2>() { new Vector2(2, -2),new Vector2(0, -2), new Vector2(-2, -2) });
+        islandNext.Add(IslandType.desert, new List<Vector2>() { new Vector2(3, -1), new Vector2(4, 0), new Vector2(3, 1) });
+        islandNext.Add(IslandType.grass, new List<Vector2>() { new Vector2(-3, -1), new Vector2(-4, 0), new Vector2(-3, 1) });
+        islandNext.Add(IslandType.ice, new List<Vector2>() { new Vector2(3, 1), new Vector2(2, 2), new Vector2(0, 2) });
+        islandNext.Add(IslandType.lava, new List<Vector2>() { new Vector2(-3, 1), new Vector2(-2, 2), new Vector2(0, 2) });
     }
 
     void GenAIobj()
@@ -141,25 +138,54 @@ public class GenerateAIObj : MonoBehaviour
         this.StartCoroutine(PostShapE($"https://nejnwmcwvhcax9-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}"));
     }
 
-    Vector3 islandPos(int x, int z)
+    Vector3 rndIslandPos()
     {
-        Vector3 pos = new Vector3(x == 0 ? x * 0.86f : 0.43f, 0, z * 0.75f);
+        List<Vector2> nextList = islandNext[islandBase];
+        Vector2 rndNext;
+
+        //choose and check exist
+        while(true){
+            rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
+            if(islandMap.ContainsKey(rndNext) == false){
+                break;
+            }
+            else{
+                nextList.Remove(rndNext);
+                islandNext[islandBase].Remove(rndNext);
+            }
+        }
+
+        float x = rndNext.x / 2 == 0 ? rndNext.x * 0.86f : rndNext.x * 0.43f;
+        float z = rndNext.y * 0.75f;
+        Vector3 pos = new Vector3(x, 0, z);
+
+        updIslandDic(rndNext);
+
         return pos;
     }
 
-    void udIslandDic(IslandType newIType, Vector2 newIPos)
+    void updIslandDic(Vector2 newIPos)
     {
-        islansBorder.Add(newIPos);
+        islandNext[islandBase].Remove(newIPos);
+        islandMap.Add(newIPos, islandBase);
+
         Vector3[] neighbors = {
-            new Vector3(newIPos.x, newIPos.y + 2),
-            new Vector3(newIPos.x, newIPos.y - 2),
+            new Vector3(newIPos.x + 2, newIPos.y),
+            new Vector3(newIPos.x - 2, newIPos.y),
+            new Vector3(newIPos.x + 1, newIPos.y + 1),
             new Vector3(newIPos.x - 1, newIPos.y + 1),
+            new Vector3(newIPos.x + 1, newIPos.y - 1),
             new Vector3(newIPos.x - 1, newIPos.y - 1),
-            new Vector3(newIPos.x + 1, newIPos.y + 1),
-            new Vector3(newIPos.x + 1, newIPos.y + 1),
         };
-        foreach(Vector3 neighbor in neighbors){
-            
+
+        foreach (Vector3 neighbor in neighbors)
+        {
+            bool inMap = islandMap.ContainsKey(neighbor);
+            bool inNext = islandNext[islandBase].Contains(neighbor);
+            if (inMap == false && inNext == false)
+            {
+                islandNext[islandBase].Add(neighbor);
+            }
         }
     }
 
@@ -169,12 +195,10 @@ public class GenerateAIObj : MonoBehaviour
         return pos;
     }
 
-    void LoadIsland()
+    public void LoadIsland()
     {
         //gen island base
-        List<Vector2> nextList = islandNext[islandBase];
-        Vector2 rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
-        GameObject island = Instantiate(islandBaseList[(int)islandBase], islandPos((int)rndNext.x, (int)rndNext.y), Quaternion.identity);
+        GameObject island = Instantiate(islandBaseList[(int)islandBase], rndIslandPos(), Quaternion.identity);
         island.transform.parent = gameObject.transform;
         island.name = thread_id;
 
@@ -192,7 +216,7 @@ public class GenerateAIObj : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        initIslandMap();
     }
 
     // Update is called once per frame
