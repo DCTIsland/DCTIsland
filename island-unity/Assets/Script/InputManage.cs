@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class InputManage : MonoBehaviour
 {
-    public GenerateAIObj genai;
+    public IslandManage islandManage;
 
     public void InputTest()
     {
         int rndID = Random.Range(0, 100);
         int rndType = Random.Range(0, 5);
-        genai.thread_id = $"test{rndID}";
-        genai.islandBase = (GenerateAIObj.IslandType)rndType;
-        genai.prompt = "";
-        genai.islandObj = null;
+        islandManage.thread_id = $"test{rndID}";
+        islandManage.islandBase = (IslandManage.IslandType)rndType;
+        islandManage.prompt = "";
+        islandManage.islandObj = null;
 
-        genai.LoadIsland();
+        islandManage.LoadIsland();
     }
 
     // Start is called before the first frame update
