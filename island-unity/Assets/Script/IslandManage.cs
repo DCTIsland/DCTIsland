@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class IslandManage : MonoBehaviour
 {
@@ -20,7 +22,8 @@ public class IslandManage : MonoBehaviour
 
     [Header("Island set:")]
     public string thread_id;
-    public string prompt;
+    public string aiObjName;
+    public Material vertex;
     public IslandType islandBase;
     public int[] islandObj;
 
@@ -101,6 +104,17 @@ public class IslandManage : MonoBehaviour
         return pos;
     }
 
+    void LoadAiObj(GameObject island){
+        GameObject aiobj = Resources.Load(Path.Combine("Models", aiObjName)) as GameObject;
+        Vector3 pos = RandomObjPos();
+        GameObject instobj = Instantiate(aiobj, pos, Quaternion.identity);
+        instobj.GetComponent<MeshRenderer>().material = vertex;
+        instobj.AddComponent<Rigidbody>();
+        instobj.AddComponent<BoxCollider>();
+        instobj.transform.parent = island.transform;
+        instobj.name = aiObjName;
+    }
+
     public void LoadIsland()
     {
         //gen island base
@@ -108,13 +122,7 @@ public class IslandManage : MonoBehaviour
         island.transform.parent = gameObject.transform;
         island.name = thread_id;
 
-        // gen ai obj on island
-        // GameObject aiobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
-        // Vector3 aiobjPos = RandomObjPos();
-        // GameObject instAiobj = Instantiate(aiobj, aiobjPos, Quaternion.identity);
-        // instAiobj.GetComponent<MeshRenderer>().material = vertex;
-        // instAiobj.transform.parent = island.transform;
-        // instAiobj.name = modelName;
+        LoadAiObj(island);
 
         //gen normal obj
     }

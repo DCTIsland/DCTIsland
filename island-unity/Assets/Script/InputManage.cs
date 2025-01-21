@@ -12,7 +12,7 @@ public class InputManage : MonoBehaviour
         int rndType = Random.Range(0, 5);
         islandManage.thread_id = $"test{rndID}";
         islandManage.islandBase = (IslandManage.IslandType)rndType;
-        islandManage.prompt = "";
+        islandManage.aiObjName = "";
         islandManage.islandObj = null;
 
         islandManage.LoadIsland();

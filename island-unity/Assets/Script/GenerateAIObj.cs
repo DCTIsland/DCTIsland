@@ -12,7 +12,6 @@ public class GenerateAIObj : MonoBehaviour
 {
 
     [Header("Assets:")]
-    public Material vertex;
     public string prompt;
     int steps = 64;
     int cfg = 15;
