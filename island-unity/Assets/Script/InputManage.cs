@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using UnityEngine;
 
 public class InputManage : MonoBehaviour
@@ -13,8 +14,7 @@ public class InputManage : MonoBehaviour
         islandManage.thread_id = $"test{rndID}";
         islandManage.islandBase = (IslandManage.IslandType)rndType;
         islandManage.aiObjName = "";
-        islandManage.islandObj = null;
-
+        
         islandManage.LoadIsland();
     }
 

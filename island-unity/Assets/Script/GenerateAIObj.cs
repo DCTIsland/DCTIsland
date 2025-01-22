@@ -10,8 +10,6 @@ using UnityEditor;
 
 public class GenerateAIObj : MonoBehaviour
 {
-
-    [Header("Assets:")]
     public string prompt;
     int steps = 64;
     int cfg = 15;
@@ -73,13 +71,6 @@ public class GenerateAIObj : MonoBehaviour
                 File.WriteAllBytes($"Assets/Resources/Models/{modelName}.{format}", modelData);
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
                 AssetDatabase.Refresh();
-
-                // load
-                // GameObject newobj = Resources.Load(Path.Combine("Models", modelName)) as GameObject;
-                // GameObject gameObject = Instantiate(newobj, Vector3.zero, Quaternion.identity);
-                // gameObject.name = modelName;
-                // gameObject.GetComponent<MeshRenderer>().material = vertex;
-                // gameObject.AddComponent<Rigidbody>();
                 Debug.Log("generate obj " + $"{modelName}");
             }
         }

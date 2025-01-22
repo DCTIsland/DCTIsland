@@ -27,8 +27,9 @@ public class IslandManage : MonoBehaviour
     public IslandType islandBase;
     public int[] islandObj;
 
-    Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>(){};
-    Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>(){};
+    Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
+    Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
+    List<GameObject[]> objList = new List<GameObject[]>();
 
     void initIslandMap()
     {
@@ -40,7 +41,7 @@ public class IslandManage : MonoBehaviour
         islandMap.Add(new Vector2(1, 1), IslandType.ice);
         islandMap.Add(new Vector2(-1, 1), IslandType.lava);
 
-        islandNext.Add(IslandType.concrete, new List<Vector2>() { new Vector2(2, -2),new Vector2(0, -2), new Vector2(-2, -2) });
+        islandNext.Add(IslandType.concrete, new List<Vector2>() { new Vector2(2, -2), new Vector2(0, -2), new Vector2(-2, -2) });
         islandNext.Add(IslandType.desert, new List<Vector2>() { new Vector2(3, -1), new Vector2(4, 0), new Vector2(3, 1) });
         islandNext.Add(IslandType.grass, new List<Vector2>() { new Vector2(-3, -1), new Vector2(-4, 0), new Vector2(-3, 1) });
         islandNext.Add(IslandType.ice, new List<Vector2>() { new Vector2(3, 1), new Vector2(2, 2), new Vector2(0, 2) });
@@ -53,12 +54,15 @@ public class IslandManage : MonoBehaviour
         Vector2 rndNext;
 
         //choose and check exist
-        while(true){
+        while (true)
+        {
             rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
-            if(islandMap.ContainsKey(rndNext) == false){
+            if (islandMap.ContainsKey(rndNext) == false)
+            {
                 break;
             }
-            else{
+            else
+            {
                 nextList.Remove(rndNext);
                 islandNext[islandBase].Remove(rndNext);
             }
@@ -104,7 +108,84 @@ public class IslandManage : MonoBehaviour
         return pos;
     }
 
-    void LoadAiObj(GameObject island){
+    void RandomObj(IslandType island)
+    {
+        int rnd, n;
+        switch (island)
+        {
+            case IslandType.concrete:
+                n = 6;
+                for (int i = 0; i < 3; i++)
+                {
+                    rnd = Random.Range(0, n);
+                    if (rnd == 6)
+                    {
+                        islandObj[i] = Random.Range(6, 7);
+                        n = 5;
+                    }
+                    else
+                        islandObj[i] = rnd;
+                }
+                break;
+            case IslandType.desert:
+                n = 5;
+                for (int i = 0; i < 3; i++)
+                {
+                    rnd = Random.Range(0, n);
+                    if (rnd == 5)
+                    {
+                        islandObj[i] = Random.Range(5, 6);
+                        n = 4;
+                    }
+                    else
+                        islandObj[i] = rnd;
+                }
+                break;
+            case IslandType.grass:
+                for (int i = 0; i < 3; i++)
+                {
+                    islandObj[i] = Random.Range(0, 7);
+                }
+                break;
+            case IslandType.ice:
+                n = 4;
+                for (int i = 0; i < 3; i++)
+                {
+                    rnd = Random.Range(0, n);
+                    if (rnd == 4)
+                    {
+                        islandObj[i] = Random.Range(4, 5);
+                        n = 3;
+                    }
+                    else
+                        islandObj[i] = rnd;
+                }
+                break;
+            case IslandType.lava:
+                for (int i = 0; i < 3; i++)
+                {
+                    islandObj[i] = Random.Range(0, 6);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void LoadObj(GameObject island)
+    {
+        objList = new List<GameObject[]>() { concreteObjList, desertObjList, grassObjList, iceObjList, lavaObjList };
+        GameObject[] l = objList[(int)islandBase];
+
+        for (int i = 0; i < 3; i++)
+        {
+            GameObject obj = Instantiate(l[islandObj[i]], RandomObjPos(), Quaternion.identity);
+            obj.transform.parent = island.transform;
+        }
+    }
+
+    void LoadAiObj(GameObject island)
+    {
         GameObject aiobj = Resources.Load(Path.Combine("Models", aiObjName)) as GameObject;
         Vector3 pos = RandomObjPos();
         GameObject instobj = Instantiate(aiobj, pos, Quaternion.identity);
@@ -123,10 +204,11 @@ public class IslandManage : MonoBehaviour
         island.name = thread_id;
 
         LoadAiObj(island);
+        RandomObj(islandBase);
 
         //gen normal obj
     }
-    
+
     // Start is called before the first frame update
     void Start()
     {
