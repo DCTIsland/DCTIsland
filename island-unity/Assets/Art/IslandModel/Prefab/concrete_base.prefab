@@ -93,6 +93,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8471392024599387215}
+  - component: {fileID: 1219039644279528194}
   m_Layer: 0
   m_Name: concrete_base
   m_TagString: Untagged
@@ -117,6 +118,27 @@ Transform:
   - {fileID: 7806864414568562804}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1219039644279528194
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4343143141590873477}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8.8, y: 1.7, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7189413136167109706
 GameObject:
   m_ObjectHideFlags: 0

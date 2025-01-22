@@ -48,7 +48,7 @@ public class IslandManage : MonoBehaviour
         islandNext.Add(IslandType.lava, new List<Vector2>() { new Vector2(-3, 1), new Vector2(-2, 2), new Vector2(0, 2) });
     }
 
-    Vector3 rndIslandPos()
+    Vector3 RndIslandPos()
     {
         List<Vector2> nextList = islandNext[islandBase];
         Vector2 rndNext;
@@ -72,12 +72,12 @@ public class IslandManage : MonoBehaviour
         float z = rndNext.y * 0.75f;
         Vector3 pos = new Vector3(x, 0, z);
 
-        updIslandDic(rndNext);
+        UpdIslandDic(rndNext);
 
         return pos;
     }
 
-    void updIslandDic(Vector2 newIPos)
+    void UpdIslandDic(Vector2 newIPos)
     {
         islandNext[islandBase].Remove(newIPos);
         islandMap.Add(newIPos, islandBase);
@@ -102,9 +102,11 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    Vector3 RandomObjPos()
+    Vector3 RandomObjPos(float y)
     {
-        Vector3 pos = new Vector3(0, 0, 0);
+        float x = Random.Range(0.0f, 3.0f);
+        float z = Random.Range(0.0f, 3.0f);
+        Vector3 pos = new Vector3(x, y, z);
         return pos;
     }
 
@@ -172,6 +174,14 @@ public class IslandManage : MonoBehaviour
         }
     }
 
+    Vector3 RndAiObjPos()
+    {
+        float x = Random.Range(0.0f, 3.0f);
+        float z = Random.Range(0.0f, 3.0f);
+        Vector3 pos = new Vector3(x, 0, z);
+        return pos;
+    }
+
     void LoadObj(GameObject island)
     {
         objList = new List<GameObject[]>() { concreteObjList, desertObjList, grassObjList, iceObjList, lavaObjList };
@@ -179,27 +189,28 @@ public class IslandManage : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            GameObject obj = Instantiate(l[islandObj[i]], RandomObjPos(), Quaternion.identity);
+            GameObject obj = Instantiate(l[islandObj[i]]);
             obj.transform.parent = island.transform;
+            obj.transform.position = RandomObjPos(obj.transform.position.y);
         }
     }
 
     void LoadAiObj(GameObject island)
     {
         GameObject aiobj = Resources.Load(Path.Combine("Models", aiObjName)) as GameObject;
-        Vector3 pos = RandomObjPos();
-        GameObject instobj = Instantiate(aiobj, pos, Quaternion.identity);
+        GameObject instobj = Instantiate(aiobj);
         instobj.GetComponent<MeshRenderer>().material = vertex;
         instobj.AddComponent<Rigidbody>();
         instobj.AddComponent<BoxCollider>();
         instobj.transform.parent = island.transform;
+        instobj.transform.transform.position = RndAiObjPos();
         instobj.name = aiObjName;
     }
 
     public void LoadIsland()
     {
         //gen island base
-        GameObject island = Instantiate(islandBaseList[(int)islandBase], rndIslandPos(), Quaternion.identity);
+        GameObject island = Instantiate(islandBaseList[(int)islandBase], RndIslandPos(), Quaternion.identity);
         island.transform.parent = gameObject.transform;
         island.name = thread_id;
 
