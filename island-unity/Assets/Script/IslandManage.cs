@@ -25,7 +25,7 @@ public class IslandManage : MonoBehaviour
     public string aiObjName;
     public Material vertex;
     public IslandType islandBase;
-    public int[] islandObj;
+    int[] islandObj = new int[3];
 
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
@@ -56,7 +56,7 @@ public class IslandManage : MonoBehaviour
         //choose and check exist
         while (true)
         {
-            rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
+            rndNext = nextList[Random.Range(0, nextList.Count)];
             if (islandMap.ContainsKey(rndNext) == false)
             {
                 break;
@@ -102,42 +102,34 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    Vector3 RandomObjPos(float y)
-    {
-        float x = Random.Range(0.0f, 3.0f);
-        float z = Random.Range(0.0f, 3.0f);
-        Vector3 pos = new Vector3(x, y, z);
-        return pos;
-    }
-
     void RandomObj(IslandType island)
     {
         int rnd, n;
         switch (island)
         {
             case IslandType.concrete:
-                n = 6;
+                n = 7;
                 for (int i = 0; i < 3; i++)
                 {
                     rnd = Random.Range(0, n);
                     if (rnd == 6)
                     {
-                        islandObj[i] = Random.Range(6, 7);
-                        n = 5;
+                        islandObj[i] = Random.Range(6, 8);
+                        n = 6;
                     }
                     else
                         islandObj[i] = rnd;
                 }
                 break;
             case IslandType.desert:
-                n = 5;
+                n = 6;
                 for (int i = 0; i < 3; i++)
                 {
                     rnd = Random.Range(0, n);
                     if (rnd == 5)
                     {
-                        islandObj[i] = Random.Range(5, 6);
-                        n = 4;
+                        islandObj[i] = Random.Range(5, 7);
+                        n = 5;
                     }
                     else
                         islandObj[i] = rnd;
@@ -150,14 +142,14 @@ public class IslandManage : MonoBehaviour
                 }
                 break;
             case IslandType.ice:
-                n = 4;
+                n = 5;
                 for (int i = 0; i < 3; i++)
                 {
                     rnd = Random.Range(0, n);
                     if (rnd == 4)
                     {
-                        islandObj[i] = Random.Range(4, 5);
-                        n = 3;
+                        islandObj[i] = Random.Range(4, 6);
+                        n = 4;
                     }
                     else
                         islandObj[i] = rnd;
@@ -174,11 +166,11 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    Vector3 RndAiObjPos()
+    Vector3 RandomObjPos()
     {
-        float x = Random.Range(0.0f, 3.0f);
-        float z = Random.Range(0.0f, 3.0f);
-        Vector3 pos = new Vector3(x, 0, z);
+        float x = Random.Range(-3.0f, 3.0f);
+        float z = Random.Range(-3.0f, 3.0f);
+        Vector3 pos = new Vector3(x, 0.7f, z);
         return pos;
     }
 
@@ -190,9 +182,17 @@ public class IslandManage : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             GameObject obj = Instantiate(l[islandObj[i]]);
-            obj.transform.parent = island.transform;
-            obj.transform.position = RandomObjPos(obj.transform.position.y);
+            obj.transform.SetParent(island.transform, false);
+            obj.transform.localPosition = RandomObjPos();
         }
+    }
+
+    Vector3 RndAiObjPos()
+    {
+        float x = Random.Range(-3.0f, 3.0f);
+        float z = Random.Range(-3.0f, 3.0f);
+        Vector3 pos = new Vector3(x, 0, z);
+        return pos;
     }
 
     void LoadAiObj(GameObject island)
@@ -202,8 +202,8 @@ public class IslandManage : MonoBehaviour
         instobj.GetComponent<MeshRenderer>().material = vertex;
         instobj.AddComponent<Rigidbody>();
         instobj.AddComponent<BoxCollider>();
-        instobj.transform.parent = island.transform;
-        instobj.transform.transform.position = RndAiObjPos();
+        instobj.transform.SetParent(island.transform, false);
+        instobj.transform.localPosition = RndAiObjPos();
         instobj.name = aiObjName;
     }
 
@@ -214,8 +214,9 @@ public class IslandManage : MonoBehaviour
         island.transform.parent = gameObject.transform;
         island.name = thread_id;
 
-        LoadAiObj(island);
+        //LoadAiObj(island);
         RandomObj(islandBase);
+        LoadObj(island);
 
         //gen normal obj
     }
