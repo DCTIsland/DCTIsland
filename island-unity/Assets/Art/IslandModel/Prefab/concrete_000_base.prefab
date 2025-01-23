@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 8471392024599387215}
   - component: {fileID: 1219039644279528194}
   m_Layer: 0
-  m_Name: concrete_base
+  m_Name: concrete_000_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
