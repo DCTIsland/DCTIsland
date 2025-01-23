@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class IslandManage : MonoBehaviour
 {
@@ -195,7 +194,7 @@ public class IslandManage : MonoBehaviour
         return pos;
     }
 
-    void LoadAiObj(GameObject island)
+    public void LoadAiObj(GameObject island)
     {
         GameObject aiobj = Resources.Load(Path.Combine("Models", aiObjName)) as GameObject;
         GameObject instobj = Instantiate(aiobj);
@@ -214,11 +213,13 @@ public class IslandManage : MonoBehaviour
         island.transform.parent = gameObject.transform;
         island.name = thread_id;
 
-        //LoadAiObj(island);
+        //ai obj
+        GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
+        genai.GenAIobj(island);
+
+        //obj
         RandomObj(islandBase);
         LoadObj(island);
-
-        //gen normal obj
     }
 
     // Start is called before the first frame update
