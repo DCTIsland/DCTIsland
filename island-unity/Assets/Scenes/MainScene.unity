@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1282,7 +1282,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1888225495}
-  - component: {fileID: 1888225494}
   - component: {fileID: 1888225496}
   m_Layer: 0
   m_Name: IslandManager
@@ -1291,19 +1290,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1888225494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1888225493}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 112625f28be6e86499c1969556b7e1f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prompt: 
 --- !u!4 &1888225495
 Transform:
   m_ObjectHideFlags: 0
@@ -1384,7 +1370,6 @@ MonoBehaviour:
   - {fileID: 1564735399401095886, guid: dfea7857393ca5949a57b1ecab53bc25, type: 3}
   - {fileID: 4246778804848550365, guid: b6f96a4617cca1848a73e0ddf8a65c25, type: 3}
   thread_id: 
-  aiObjName: 
   vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
   islandBase: 0
 --- !u!1001 &1899416994

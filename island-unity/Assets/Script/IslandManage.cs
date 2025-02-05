@@ -21,7 +21,6 @@ public class IslandManage : MonoBehaviour
 
     [Header("Island set:")]
     public string thread_id;
-    public string aiObjName;
     public Material vertex;
     public IslandType islandBase;
     int[] islandObj = new int[3];
@@ -188,22 +187,23 @@ public class IslandManage : MonoBehaviour
 
     Vector3 RndAiObjPos()
     {
-        float x = Random.Range(-3.0f, 3.0f);
-        float z = Random.Range(-3.0f, 3.0f);
-        Vector3 pos = new Vector3(x, 0, z);
+        float x = Random.Range(-1.0f, 1.0f);
+        float z = Random.Range(-1.0f, 1.0f);
+        Vector3 pos = new Vector3(x, 3, z);
         return pos;
     }
 
-    public void LoadAiObj(GameObject island)
+    void LoadAiObj(GameObject island, string objName)
     {
-        GameObject aiobj = Resources.Load(Path.Combine("Models", aiObjName)) as GameObject;
+        GameObject aiobj = Resources.Load(Path.Combine("Models", objName)) as GameObject;
         GameObject instobj = Instantiate(aiobj);
         instobj.GetComponent<MeshRenderer>().material = vertex;
         instobj.AddComponent<Rigidbody>();
         instobj.AddComponent<BoxCollider>();
         instobj.transform.SetParent(island.transform, false);
         instobj.transform.localPosition = RndAiObjPos();
-        instobj.name = aiObjName;
+        instobj.name = objName;
+        Debug.Log("Load AI Object Successful.");
     }
 
     public void LoadIsland()
@@ -214,8 +214,8 @@ public class IslandManage : MonoBehaviour
         island.name = thread_id;
 
         //ai obj
-        GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
-        genai.GenAIobj(island);
+        // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
+        // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
 
         //obj
         RandomObj(islandBase);

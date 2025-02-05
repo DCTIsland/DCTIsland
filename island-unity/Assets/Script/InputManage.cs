@@ -6,6 +6,7 @@ using UnityEngine;
 public class InputManage : MonoBehaviour
 {
     public IslandManage islandManage;
+    //public GenerateAIObj generateAIObj;
 
     public void InputTest()
     {
@@ -13,7 +14,7 @@ public class InputManage : MonoBehaviour
         int rndType = Random.Range(0, 5);
         islandManage.thread_id = $"test{rndID}";
         islandManage.islandBase = (IslandManage.IslandType)rndType;
-        islandManage.aiObjName = "";
+        //generateAIObj.prompt = "mouse";
         
         islandManage.LoadIsland();
     }

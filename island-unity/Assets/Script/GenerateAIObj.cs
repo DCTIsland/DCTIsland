@@ -43,7 +43,7 @@ public class GenerateAIObj : MonoBehaviour
             }
     }
 
-    IEnumerator PostShapE(string url, string bodyJsonString, GameObject island)
+    IEnumerator PostShapE(string url, string bodyJsonString, Action<string> callback)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
@@ -72,15 +72,14 @@ public class GenerateAIObj : MonoBehaviour
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
                 AssetDatabase.Refresh();
 
-                IslandManage islMan = gameObject.GetComponent<IslandManage>();
-                islMan.LoadAiObj(island); 
+                callback?.Invoke(modelName); 
             }
         }
 
         request.Dispose();
     }
 
-    public void GenAIobj(GameObject island)
+    public void GenAIobj(Action<string> loadObj)
     {
         prompt = Regex.Replace(prompt, @"\\(?!n|"")", "");
         prompt = Regex.Replace(prompt, "(?<!n)\n", "\\n");
@@ -89,7 +88,7 @@ public class GenerateAIObj : MonoBehaviour
 
         OverwriteCheck();
         Debug.Log("{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}");
-        this.StartCoroutine(PostShapE($"https://nejnwmcwvhcax9-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}", island));
+        this.StartCoroutine(PostShapE($"https://nejnwmcwvhcax9-5000.proxy.runpod.net/data", "{\"prompt\":\"" + $"{prompt}" + "\",\"steps\":\"" + $"{steps}" + "\",\"cfg\":\"" + $"{cfg}" + "\",\"invoice\":\"" + $"{invoice}" + "\",\"fileFormat\":\"" + $"{format}" + "\"}", loadObj));
     }
 
     // Start is called before the first frame update
