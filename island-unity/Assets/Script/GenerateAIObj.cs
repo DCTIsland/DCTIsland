@@ -65,9 +65,6 @@ public class GenerateAIObj : MonoBehaviour
             else
             {
                 byte[] modelData = Convert.FromBase64String(request.downloadHandler.text);
-                string filePath = Path.Combine(Application.persistentDataPath, $"{modelName}.{format}");
-
-                File.WriteAllBytes(filePath, modelData);
                 File.WriteAllBytes($"Assets/Resources/Models/{modelName}.{format}", modelData);
                 Debug.Log($"<color=green>Inference Successful: </color>Please find the model in the {directoryPath}");
                 AssetDatabase.Refresh();

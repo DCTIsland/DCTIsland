@@ -20,6 +20,7 @@ public class IslandManage : MonoBehaviour
     public GameObject[] lavaObjList;
 
     [Header("Island set:")]
+    public string id;
     public string thread_id;
     public Material vertex;
     public IslandType islandBase;
@@ -28,6 +29,8 @@ public class IslandManage : MonoBehaviour
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
     List<GameObject[]> objList = new List<GameObject[]>();
+
+    public Snapshot snapshot;
 
     void initIslandMap()
     {
@@ -209,9 +212,9 @@ public class IslandManage : MonoBehaviour
     public void LoadIsland()
     {
         //gen island base
-        GameObject island = Instantiate(islandBaseList[(int)islandBase], RndIslandPos(), Quaternion.identity);
-        island.transform.parent = gameObject.transform;
-        island.name = thread_id;
+        GameObject island = Instantiate(islandBaseList[(int)islandBase], new Vector3(0, -100, 0), Quaternion.identity);
+        island.transform.SetParent(gameObject.transform);
+        island.name = id;
 
         //ai obj
         // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
@@ -220,6 +223,9 @@ public class IslandManage : MonoBehaviour
         //obj
         RandomObj(islandBase);
         LoadObj(island);
+
+        //snapshot
+        snapshot.DoTakeSnapshot(id, () => island.transform.localPosition = RndIslandPos());
     }
 
     // Start is called before the first frame update

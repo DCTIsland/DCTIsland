@@ -12,6 +12,7 @@ public class InputManage : MonoBehaviour
     {
         int rndID = Random.Range(0, 100);
         int rndType = Random.Range(0, 5);
+        islandManage.id = $"test{rndID}";
         islandManage.thread_id = $"test{rndID}";
         islandManage.islandBase = (IslandManage.IslandType)rndType;
         //generateAIObj.prompt = "mouse";
