@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using DG.Tweening;
 
 public class IslandManage : MonoBehaviour
 {
@@ -209,6 +210,12 @@ public class IslandManage : MonoBehaviour
         Debug.Log("Load AI Object Successful.");
     }
 
+    void IslandToPos(GameObject island){
+        Vector3 pos = RndIslandPos();
+        island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
+        island.transform.DOLocalMoveY(pos.y, 1);
+    }
+
     public void LoadIsland()
     {
         //gen island base
@@ -225,7 +232,7 @@ public class IslandManage : MonoBehaviour
         LoadObj(island);
 
         //snapshot
-        snapshot.DoTakeSnapshot(id, () => island.transform.localPosition = RndIslandPos());
+        snapshot.DoTakeSnapshot(id, () => IslandToPos(island));
     }
 
     // Start is called before the first frame update
