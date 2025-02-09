@@ -23,9 +23,10 @@ public class IslandManage : MonoBehaviour
     [Header("Island set:")]
     public string id;
     public string thread_id;
-    public Material vertex;
     public IslandType islandBase;
     int[] islandObj = new int[3];
+    public Material vertex;
+    public GameObject mascot;
 
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
@@ -210,7 +211,21 @@ public class IslandManage : MonoBehaviour
         Debug.Log("Load AI Object Successful.");
     }
 
-    void IslandToPos(GameObject island){
+    void LoadMascot(GameObject island, string texName)
+    {
+        Texture texture = Resources.Load(Path.Combine("Texture", texName)) as Texture;
+        Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        mascotMat.SetTexture("_BaseMap", texture);
+
+        GameObject addMascot = Instantiate(mascot);
+        addMascot.GetComponent<MeshRenderer>().material = mascotMat;
+        addMascot.transform.SetParent(island.transform, false);
+        addMascot.transform.localPosition = RandomObjPos();
+        Debug.Log("Load Mascot with AI Texture Successful");
+    }
+
+    void IslandToPos(GameObject island)
+    {
         Vector3 pos = RndIslandPos();
         island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
         island.transform.DOLocalMoveY(pos.y, 1);
@@ -226,6 +241,9 @@ public class IslandManage : MonoBehaviour
         //ai obj
         // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
         // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
+
+        //mascot
+        //LoadMascot(island, "paper");
 
         //obj
         RandomObj(islandBase);
