@@ -3167,8 +3167,9 @@ MonoBehaviour:
   - {fileID: 4246778804848550365, guid: b6f96a4617cca1848a73e0ddf8a65c25, type: 3}
   id: 
   thread_id: 
-  vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
   islandBase: 0
+  vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
+  mascot: {fileID: 0}
   snapshot: {fileID: 479470918}
 --- !u!1001 &1899416994
 PrefabInstance:
