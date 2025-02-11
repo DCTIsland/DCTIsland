@@ -4,13 +4,13 @@ using System.IO;
 using UnityEngine;
 using DG.Tweening;
 
+public enum IslandType
+{
+    concrete, desert, grass, ice, lava
+}
+
 public class IslandManage : MonoBehaviour
 {
-    public enum IslandType
-    {
-        concrete, desert, grass, ice, lava
-    }
-
     [Header("Island base:")]
     public GameObject[] islandBaseList;
     [Header("Island assets:")]
@@ -198,6 +198,7 @@ public class IslandManage : MonoBehaviour
         return pos;
     }
 
+    [System.Obsolete]
     void LoadAiObj(GameObject island, string objName)
     {
         GameObject aiobj = Resources.Load(Path.Combine("Models", objName)) as GameObject;

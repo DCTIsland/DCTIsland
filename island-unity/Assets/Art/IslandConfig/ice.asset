@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa115d1190a16d44bb5f996d3ee934f, type: 3}
+  m_Name: ice
+  m_EditorClassIdentifier: 
+  islandType: 3
+  basePrefab: {fileID: 688106766369309686, guid: 263cadd04e4f9504e8d78f51a6ee8d1b,
+    type: 3}
+  objects:
+  - prefab: {fileID: 7906624372495607167, guid: 3908be712a81620439c39ee6dc61d248,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 7538338312259919638, guid: db2abf157d4a6244789c3bd12cd51692,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 4691740684919684671, guid: 5bcc780b932fd2e42bed0a7c68db2f09,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 5038015781724955106, guid: a7fe1960da7e60e45a171f2445d2d6d3,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 4778654073760918362, guid: fd59707b5013b3647b1e21ac26865c13,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 2469561532293645488, guid: c1faf38dcf94ea24b97cd02ee06bd1e7,
+      type: 3}
+    sideLen: 3

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa115d1190a16d44bb5f996d3ee934f, type: 3}
+  m_Name: lava
+  m_EditorClassIdentifier: 
+  islandType: 4
+  basePrefab: {fileID: 1940210403255313113, guid: 3e0348a2d6247d74a90a107ee2e14cf9,
+    type: 3}
+  objects:
+  - prefab: {fileID: 6919075521980874968, guid: 4072094f4b11c9149bf83dd5d7862e5d,
+      type: 3}
+    sideLen: 2
+  - prefab: {fileID: 2470619829108475999, guid: 3a11b854ead30ce4db3339839e14b559,
+      type: 3}
+    sideLen: 4
+  - prefab: {fileID: 1729312780832694085, guid: 72d3e3fbd6b5e2846a71d851094ff2d1,
+      type: 3}
+    sideLen: 4
+  - prefab: {fileID: 7831200621730910007, guid: 1081a4b48ab16284893e5f764f8f25b7,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 1564735399401095886, guid: dfea7857393ca5949a57b1ecab53bc25,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 4246778804848550365, guid: b6f96a4617cca1848a73e0ddf8a65c25,
+      type: 3}
+    sideLen: 2
