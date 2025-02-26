@@ -14,5 +14,6 @@ public class IslandData : ScriptableObject
 {
     public IslandType islandType;
     public GameObject basePrefab;
+    public GameObject stagePrefab;
     public ObjectData[] objects;
 }

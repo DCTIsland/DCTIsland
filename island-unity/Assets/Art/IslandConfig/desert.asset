@@ -15,6 +15,8 @@ MonoBehaviour:
   islandType: 1
   basePrefab: {fileID: 2155573526698546940, guid: 99ec5ca1905b5e74faeb0ed669ed4e77,
     type: 3}
+  stagePrefab: {fileID: 5621115047341778962, guid: b1821296583aa7f44aad2d87975379c3,
+    type: 3}
   objects:
   - prefab: {fileID: 7628089144678098483, guid: fb099dd22087e3940b877df6766ace6b,
       type: 3}
