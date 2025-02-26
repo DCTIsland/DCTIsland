@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa115d1190a16d44bb5f996d3ee934f, type: 3}
+  m_Name: desert
+  m_EditorClassIdentifier: 
+  islandType: 1
+  basePrefab: {fileID: 2155573526698546940, guid: 99ec5ca1905b5e74faeb0ed669ed4e77,
+    type: 3}
+  stagePrefab: {fileID: 5621115047341778962, guid: b1821296583aa7f44aad2d87975379c3,
+    type: 3}
+  objects:
+  - prefab: {fileID: 7628089144678098483, guid: fb099dd22087e3940b877df6766ace6b,
+      type: 3}
+    sideLen: 2
+  - prefab: {fileID: 5315098850024224792, guid: ebc1d252fb61c504695207913ddd1cad,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 2197000515344818380, guid: 65c8156c366b9be44a08d8bb82cc8a50,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 8524173808594347377, guid: 6688711adf9716a47a8f34e9e3d49e4a,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 8738229325618008931, guid: 2b94e872cf105994bb0fa7ffe4b5e1ed,
+      type: 3}
+    sideLen: 2
+  - prefab: {fileID: 2075810352514018480, guid: 3009d25c7eca07144a2bcb9d91c7bb98,
+      type: 3}
+    sideLen: 4
+  - prefab: {fileID: 818763081780692489, guid: 64486dccfce11c94d8e1d67fc1af8fc2, type: 3}
+    sideLen: 3

@@ -1,36 +1,42 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using DG.Tweening;
+using System;
+
+public enum IslandType
+{
+    concrete, desert, grass, ice, lava
+}
 
 public class IslandManage : MonoBehaviour
 {
-    public enum IslandType
+    struct Obj
     {
-        concrete, desert, grass, ice, lava
+        public GameObject objPrefab;
+        public Quaternion rotation;
+        public Vector3 position;
     }
 
-    [Header("Island base:")]
-    public GameObject[] islandBaseList;
     [Header("Island assets:")]
-    public GameObject[] concreteObjList;
-    public GameObject[] desertObjList;
-    public GameObject[] grassObjList;
-    public GameObject[] iceObjList;
-    public GameObject[] lavaObjList;
+    public IslandData[] islandDatas;
+    public GameObject[] mascot;
 
     [Header("Island set:")]
     public string id;
     public string thread_id;
-    public Material vertex;
     public IslandType islandBase;
-    int[] islandObj = new int[3];
+    public string mascotTexName;
+    Obj[] islandObj = new Obj[3];
+    public Material vertex; //unused
 
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
-    List<GameObject[]> objList = new List<GameObject[]>();
+    Dictionary<IslandType, IslandData> islandDic = new Dictionary<IslandType, IslandData>();
 
+    int[,] insideMap;
     public Snapshot snapshot;
 
     void initIslandMap()
@@ -50,6 +56,29 @@ public class IslandManage : MonoBehaviour
         islandNext.Add(IslandType.lava, new List<Vector2>() { new Vector2(-3, 1), new Vector2(-2, 2), new Vector2(0, 2) });
     }
 
+    void initIslandDic()
+    {
+        foreach (var data in islandDatas)
+        {
+            islandDic.Add(data.islandType, data);
+        }
+    }
+
+    void initInsideMap()
+    {
+        insideMap = new int[8, 8]
+        {
+            {1, 1, 1, 0, 0, 1, 1, 1},
+            {1, 0, 0, 0, 0, 0, 0, 1},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0},
+            {1, 0, 0, 0, 0, 0, 0, 1},
+            {1, 1, 1, 0, 0, 1, 1, 1}
+        };
+    }
+
     Vector3 RndIslandPos()
     {
         List<Vector2> nextList = islandNext[islandBase];
@@ -58,7 +87,7 @@ public class IslandManage : MonoBehaviour
         //choose and check exist
         while (true)
         {
-            rndNext = nextList[Random.Range(0, nextList.Count)];
+            rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
             if (islandMap.ContainsKey(rndNext) == false)
             {
                 break;
@@ -104,99 +133,143 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    void RandomObj(IslandType island)
+    List<(int, int)> FindSpace(int[,] grid, int k)
     {
-        int rnd, n;
-        switch (island)
+        List<(int, int)> emptySpaces = new List<(int, int)>();
+        for (int i = 0; i < 8 - k; i++)
         {
-            case IslandType.concrete:
-                n = 7;
-                for (int i = 0; i < 3; i++)
-                {
-                    rnd = Random.Range(0, n);
-                    if (rnd == 6)
-                    {
-                        islandObj[i] = Random.Range(6, 8);
-                        n = 6;
-                    }
-                    else
-                        islandObj[i] = rnd;
-                }
-                break;
-            case IslandType.desert:
-                n = 6;
-                for (int i = 0; i < 3; i++)
-                {
-                    rnd = Random.Range(0, n);
-                    if (rnd == 5)
-                    {
-                        islandObj[i] = Random.Range(5, 7);
-                        n = 5;
-                    }
-                    else
-                        islandObj[i] = rnd;
-                }
-                break;
-            case IslandType.grass:
-                for (int i = 0; i < 3; i++)
-                {
-                    islandObj[i] = Random.Range(0, 7);
-                }
-                break;
-            case IslandType.ice:
-                n = 5;
-                for (int i = 0; i < 3; i++)
-                {
-                    rnd = Random.Range(0, n);
-                    if (rnd == 4)
-                    {
-                        islandObj[i] = Random.Range(4, 6);
-                        n = 4;
-                    }
-                    else
-                        islandObj[i] = rnd;
-                }
-                break;
-            case IslandType.lava:
-                for (int i = 0; i < 3; i++)
-                {
-                    islandObj[i] = Random.Range(0, 6);
-                }
-                break;
-            default:
-                break;
+            for (int j = 0; j < 8 - k; j++)
+            {
+                if (isEmptyRegion(grid, i, j, k) == true)
+                    emptySpaces.Add((i, j));
+            }
+        }
+
+        return emptySpaces;
+    }
+
+    bool isEmptyRegion(int[,] grid, int x, int y, int k)
+    {
+        for (int i = x; i < x + k; i++)
+        {
+            for (int j = y; j < y + k; j++)
+            {
+                if (grid[i, j] == 1)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    void FillRegion(int[,] grid, int x, int y, int k)
+    {
+        Debug.Log($"Fill x: {x}, y: {y}");
+
+        for (int i = x; i < x + k; i++)
+        {
+            for (int j = y; j < y + k; j++)
+            {
+                grid[i, j] = 1;
+            }
         }
     }
 
-    Vector3 RandomObjPos()
+    void RndObj()
     {
-        float x = Random.Range(-3.0f, 3.0f);
-        float z = Random.Range(-3.0f, 3.0f);
-        Vector3 pos = new Vector3(x, 0.7f, z);
-        return pos;
+        List<ObjectData> tmpObjList = islandDic[islandBase].objects
+            .Select(obj => new ObjectData { prefab = obj.prefab, sideLen = obj.sideLen })
+            .ToList();
+
+        bool isSpecialType = islandBase == IslandType.concrete || islandBase == IslandType.desert || islandBase == IslandType.ice;
+        int current = 0;
+        int objN;
+
+        while (current < 3)
+        {
+            if (current == 0 && isSpecialType)
+            {
+                int rnd = UnityEngine.Random.Range(0, 100);
+                if (rnd >= 50)
+                {
+                    objN = rnd > 70 ? tmpObjList.Count - 2 : tmpObjList.Count - 1;
+                }
+                else
+                {
+                    objN = UnityEngine.Random.Range(0, tmpObjList.Count - 2);
+                }
+
+                tmpObjList.Remove(tmpObjList[^2]);
+                tmpObjList.Remove(tmpObjList[^1]);
+            }
+            else
+            {
+                objN = UnityEngine.Random.Range(0, tmpObjList.Count);
+            }
+
+            addObjList(ref current, objN, insideMap, tmpObjList);
+
+            if (tmpObjList.Count == 0)
+                break;
+        }
+
+        initInsideMap();
+    }
+
+    void addObjList(ref int current, int n, int[,] map, List<ObjectData> tmpObjList)
+    {
+        ObjectData[] objects = islandDic[islandBase].objects;
+        List<(int, int)> spaceList = FindSpace(map, objects[n].sideLen);
+
+        if (spaceList.Count != 0)
+        {
+            (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
+            islandObj[current] = new Obj
+            {
+                objPrefab = objects[n].prefab,
+                rotation = Quaternion.identity,
+                position = ObjPos(coord.Item1, coord.Item2, objects[n].sideLen)
+            };
+
+            FillRegion(map, coord.Item1, coord.Item2, objects[n].sideLen);
+            current++;
+        }
+        else
+        {
+            if (n < tmpObjList.Count)
+                tmpObjList.Remove(tmpObjList[n]);
+        }
+    }
+
+    Vector3 ObjPos(int x, int y, int side, float posY = 0.7f)
+    {
+        float posZ = x - 4 + side * 0.5f;
+        float posX = y + (-2 * y + 4) - side * 0.5f;
+        return new Vector3(posX, posY, posZ);
     }
 
     void LoadObj(GameObject island)
     {
-        objList = new List<GameObject[]>() { concreteObjList, desertObjList, grassObjList, iceObjList, lavaObjList };
-        GameObject[] l = objList[(int)islandBase];
-
         for (int i = 0; i < 3; i++)
         {
-            GameObject obj = Instantiate(l[islandObj[i]]);
-            obj.transform.SetParent(island.transform, false);
-            obj.transform.localPosition = RandomObjPos();
+            if (islandObj[i].objPrefab != null)
+            {
+                GameObject obj = Instantiate(islandObj[i].objPrefab);
+                obj.transform.SetParent(island.transform, false);
+                obj.transform.localPosition = islandObj[i].position;
+                obj.transform.localRotation = islandObj[i].rotation;
+            }
         }
     }
 
     Vector3 RndAiObjPos()
     {
-        float x = Random.Range(-1.0f, 1.0f);
-        float z = Random.Range(-1.0f, 1.0f);
+        float x = UnityEngine.Random.Range(-1.0f, 1.0f);
+        float z = UnityEngine.Random.Range(-1.0f, 1.0f);
         Vector3 pos = new Vector3(x, 3, z);
         return pos;
     }
 
+    [System.Obsolete]
     void LoadAiObj(GameObject island, string objName)
     {
         GameObject aiobj = Resources.Load(Path.Combine("Models", objName)) as GameObject;
@@ -210,7 +283,34 @@ public class IslandManage : MonoBehaviour
         Debug.Log("Load AI Object Successful.");
     }
 
-    void IslandToPos(GameObject island){
+    void LoadMascot(GameObject island)
+    {
+        //material
+        Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));;
+        if (mascotTexName != null && mascotTexName != "")
+        {
+            Texture texture = Resources.Load(Path.Combine("Texture", mascotTexName)) as Texture; 
+            mascotMat.SetTexture("_BaseMap", texture);
+        }
+
+        //stage
+        List<(int, int)> spaceList = FindSpace(insideMap, 2);
+        (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
+        FillRegion(insideMap, coord.Item1, coord.Item2, 2);
+
+        GameObject addStage = Instantiate(islandDic[islandBase].stagePrefab);
+        addStage.transform.SetParent(island.transform, false);
+        addStage.transform.localPosition = ObjPos(coord.Item1, coord.Item2, 2, 1);
+
+        //mascot
+        GameObject addMascot = Instantiate(mascot[UnityEngine.Random.Range(0, mascot.Length)]);
+        addMascot.GetComponent<MeshRenderer>().material = mascotMat;
+        addMascot.transform.SetParent(addStage.transform, false);
+        Debug.Log("Load Mascot with AI Texture Successful");
+    }
+
+    void IslandToPos(GameObject island)
+    {
         Vector3 pos = RndIslandPos();
         island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
         island.transform.DOLocalMoveY(pos.y, 1);
@@ -219,7 +319,7 @@ public class IslandManage : MonoBehaviour
     public void LoadIsland()
     {
         //gen island base
-        GameObject island = Instantiate(islandBaseList[(int)islandBase], new Vector3(0, -100, 0), Quaternion.identity);
+        GameObject island = Instantiate(islandDic[islandBase].basePrefab, new Vector3(0, -100, 0), Quaternion.identity);
         island.transform.SetParent(gameObject.transform);
         island.name = id;
 
@@ -227,18 +327,29 @@ public class IslandManage : MonoBehaviour
         // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
         // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
 
+        //mascot
+        LoadMascot(island);
+
         //obj
-        RandomObj(islandBase);
+        RndObj();
         LoadObj(island);
+        Array.Clear(islandObj, 0, 3);
 
         //snapshot
         snapshot.DoTakeSnapshot(id, () => IslandToPos(island));
     }
 
+    void OnEnable()
+    {
+        initIslandMap();
+        initIslandDic();
+        initInsideMap();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        initIslandMap();
+
     }
 
     // Update is called once per frame

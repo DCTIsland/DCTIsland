@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fa115d1190a16d44bb5f996d3ee934f, type: 3}
+  m_Name: grass
+  m_EditorClassIdentifier: 
+  islandType: 2
+  basePrefab: {fileID: 271504724097498386, guid: a045fbd69cfda0a4694b1ac00dd49227,
+    type: 3}
+  stagePrefab: {fileID: 3248762345359941476, guid: 0ab849b42c2866844bddcee2913b3068,
+    type: 3}
+  objects:
+  - prefab: {fileID: 1978400182063516302, guid: 1e243966ce080bb479768ada164cfd9e,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 846776345450606630, guid: 9d4b3df80a207af438e6723775378c61, type: 3}
+    sideLen: 3
+  - prefab: {fileID: 377812506202652017, guid: d42b7239eabca0449a61cbb21a50ab13, type: 3}
+    sideLen: 1
+  - prefab: {fileID: 5454535575374220795, guid: 90e1513ae9e54b54ead4f0d6e6adb64e,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 5188562291432794029, guid: dd928fb065eac8445b57bcb5b950f78e,
+      type: 3}
+    sideLen: 3
+  - prefab: {fileID: 3779616220257349088, guid: a9dd9d0596c0fcf46bb7e4ed77941ec4,
+      type: 3}
+    sideLen: 1
+  - prefab: {fileID: 8130695987035700304, guid: a2b067d9ed39ebf429807e7ca28c30dc,
+      type: 3}
+    sideLen: 2

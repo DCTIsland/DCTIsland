@@ -207,8 +207,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
@@ -965,13 +965,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 479470913}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.21554485, y: -0, z: -0, w: 0.976494}
-  m_LocalPosition: {x: 0, y: 0.51399994, z: -1.176}
+  m_LocalRotation: {x: -0, y: 0.9459189, z: -0.32440326, w: 0}
+  m_LocalPosition: {x: 0, y: 0.94, z: 1.176}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 738354223}
-  m_LocalEulerAnglesHint: {x: 24.895, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 37.859, y: 180, z: 0}
 --- !u!114 &479470918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1755,8 +1755,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -773, y: -432}
-  m_SizeDelta: {x: 250, y: 90}
+  m_AnchoredPosition: {x: -875.1, y: -488.8}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &966866302
 MonoBehaviour:
@@ -3120,55 +3120,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ba0953ae9959b148bcde2ac4c3226be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islandBaseList:
-  - {fileID: 4343143141590873477, guid: 51dca757bf678634cb5309cba646ef5e, type: 3}
-  - {fileID: 2155573526698546940, guid: 99ec5ca1905b5e74faeb0ed669ed4e77, type: 3}
-  - {fileID: 271504724097498386, guid: a045fbd69cfda0a4694b1ac00dd49227, type: 3}
-  - {fileID: 688106766369309686, guid: 263cadd04e4f9504e8d78f51a6ee8d1b, type: 3}
-  - {fileID: 1940210403255313113, guid: 3e0348a2d6247d74a90a107ee2e14cf9, type: 3}
-  concreteObjList:
-  - {fileID: 5020948316939897623, guid: f126ca352ac8a01498e3547881712cc7, type: 3}
-  - {fileID: 7471016991742986867, guid: 250faea0a5da3ad4f9ff7153334db90e, type: 3}
-  - {fileID: 2123907512813315598, guid: 7bf3ff43ef3b0b74ab73fa314e16b449, type: 3}
-  - {fileID: 6666681414328834866, guid: 6a8d881592459b44eaa6d182185791c5, type: 3}
-  - {fileID: 7773668474699576890, guid: 24cad752db6e4cf4096d0bf643c1ab8a, type: 3}
-  - {fileID: 5458364437035956110, guid: 0ed06c613fea48a4f9a999da1d7f3171, type: 3}
-  - {fileID: 216489923083167501, guid: 07595b30a895b774aaa5962e069f8f1b, type: 3}
-  - {fileID: 7916215288126594799, guid: 365a5942910c88241a7dd865a0ffdcce, type: 3}
-  desertObjList:
-  - {fileID: 7628089144678098483, guid: fb099dd22087e3940b877df6766ace6b, type: 3}
-  - {fileID: 5315098850024224792, guid: ebc1d252fb61c504695207913ddd1cad, type: 3}
-  - {fileID: 2197000515344818380, guid: 65c8156c366b9be44a08d8bb82cc8a50, type: 3}
-  - {fileID: 8524173808594347377, guid: 6688711adf9716a47a8f34e9e3d49e4a, type: 3}
-  - {fileID: 8738229325618008931, guid: 2b94e872cf105994bb0fa7ffe4b5e1ed, type: 3}
-  - {fileID: 2075810352514018480, guid: 3009d25c7eca07144a2bcb9d91c7bb98, type: 3}
-  - {fileID: 818763081780692489, guid: 64486dccfce11c94d8e1d67fc1af8fc2, type: 3}
-  grassObjList:
-  - {fileID: 1978400182063516302, guid: 1e243966ce080bb479768ada164cfd9e, type: 3}
-  - {fileID: 846776345450606630, guid: 9d4b3df80a207af438e6723775378c61, type: 3}
-  - {fileID: 377812506202652017, guid: d42b7239eabca0449a61cbb21a50ab13, type: 3}
-  - {fileID: 5454535575374220795, guid: 90e1513ae9e54b54ead4f0d6e6adb64e, type: 3}
-  - {fileID: 5188562291432794029, guid: dd928fb065eac8445b57bcb5b950f78e, type: 3}
-  - {fileID: 3779616220257349088, guid: a9dd9d0596c0fcf46bb7e4ed77941ec4, type: 3}
-  - {fileID: 8130695987035700304, guid: a2b067d9ed39ebf429807e7ca28c30dc, type: 3}
-  iceObjList:
-  - {fileID: 7906624372495607167, guid: 3908be712a81620439c39ee6dc61d248, type: 3}
-  - {fileID: 7538338312259919638, guid: db2abf157d4a6244789c3bd12cd51692, type: 3}
-  - {fileID: 4691740684919684671, guid: 5bcc780b932fd2e42bed0a7c68db2f09, type: 3}
-  - {fileID: 5038015781724955106, guid: a7fe1960da7e60e45a171f2445d2d6d3, type: 3}
-  - {fileID: 4778654073760918362, guid: fd59707b5013b3647b1e21ac26865c13, type: 3}
-  - {fileID: 2469561532293645488, guid: c1faf38dcf94ea24b97cd02ee06bd1e7, type: 3}
-  lavaObjList:
-  - {fileID: 6919075521980874968, guid: 4072094f4b11c9149bf83dd5d7862e5d, type: 3}
-  - {fileID: 2470619829108475999, guid: 3a11b854ead30ce4db3339839e14b559, type: 3}
-  - {fileID: 1729312780832694085, guid: 72d3e3fbd6b5e2846a71d851094ff2d1, type: 3}
-  - {fileID: 7831200621730910007, guid: 1081a4b48ab16284893e5f764f8f25b7, type: 3}
-  - {fileID: 1564735399401095886, guid: dfea7857393ca5949a57b1ecab53bc25, type: 3}
-  - {fileID: 4246778804848550365, guid: b6f96a4617cca1848a73e0ddf8a65c25, type: 3}
+  islandDatas:
+  - {fileID: 11400000, guid: d48b2c9d822baf941ba4fc95452060cc, type: 2}
+  - {fileID: 11400000, guid: f2a46989e56f237469294c1014061132, type: 2}
+  - {fileID: 11400000, guid: c4fb04a4577c59a488d2bc7b3bb37fe8, type: 2}
+  - {fileID: 11400000, guid: 8a2d5472008534146913b2ff7e8cc975, type: 2}
+  - {fileID: 11400000, guid: 78878476be9738b4bb9f97612e9f7401, type: 2}
+  mascot:
+  - {fileID: 1983355701407065474, guid: 07ba2eb10f9d6104c9f54245d2ffc183, type: 3}
+  - {fileID: 1906433300650258799, guid: 20b38775375053143af41a23127becba, type: 3}
+  - {fileID: 2735986951285341751, guid: 645fc56c884c91d488808858678b5a83, type: 3}
+  - {fileID: 4400664114362998382, guid: f1f9b1e4172d2a34c8c80a7ad61a4c4f, type: 3}
+  - {fileID: 9203939563039525399, guid: 751170d3fc23e0744b56595c4ba86323, type: 3}
   id: 
   thread_id: 
-  vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
   islandBase: 0
+  mascotTexName: 
+  vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
   snapshot: {fileID: 479470918}
 --- !u!1001 &1899416994
 PrefabInstance:
