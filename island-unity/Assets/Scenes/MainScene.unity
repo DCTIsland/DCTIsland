@@ -3126,13 +3126,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c4fb04a4577c59a488d2bc7b3bb37fe8, type: 2}
   - {fileID: 11400000, guid: 8a2d5472008534146913b2ff7e8cc975, type: 2}
   - {fileID: 11400000, guid: 78878476be9738b4bb9f97612e9f7401, type: 2}
+  mascot:
+  - {fileID: 1983355701407065474, guid: 07ba2eb10f9d6104c9f54245d2ffc183, type: 3}
+  - {fileID: 1906433300650258799, guid: 20b38775375053143af41a23127becba, type: 3}
+  - {fileID: 2735986951285341751, guid: 645fc56c884c91d488808858678b5a83, type: 3}
+  - {fileID: 4400664114362998382, guid: f1f9b1e4172d2a34c8c80a7ad61a4c4f, type: 3}
+  - {fileID: 9203939563039525399, guid: 751170d3fc23e0744b56595c4ba86323, type: 3}
   id: 
   thread_id: 
   islandBase: 0
+  mascotTexName: 
   vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
-  mascot: {fileID: 0}
-  mascotStage: {fileID: 4268140482251358170, guid: f05ffaafa99c9614f81958bb07a9c2ea,
-    type: 3}
   snapshot: {fileID: 479470918}
 --- !u!1001 &1899416994
 PrefabInstance:

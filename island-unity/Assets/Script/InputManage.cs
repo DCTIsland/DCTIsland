@@ -15,6 +15,7 @@ public class InputManage : MonoBehaviour
         islandManage.id = $"test{rndID}";
         islandManage.thread_id = $"test{rndID}";
         islandManage.islandBase = (IslandType)rndType;
+        islandManage.mascotTexName = "";
         //generateAIObj.prompt = "mouse";
         
         islandManage.LoadIsland();

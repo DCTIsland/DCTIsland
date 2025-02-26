@@ -22,15 +22,15 @@ public class IslandManage : MonoBehaviour
 
     [Header("Island assets:")]
     public IslandData[] islandDatas;
+    public GameObject[] mascot;
 
     [Header("Island set:")]
     public string id;
     public string thread_id;
     public IslandType islandBase;
+    public string mascotTexName;
     Obj[] islandObj = new Obj[3];
-    public Material vertex;
-    public GameObject mascot;
-    public GameObject mascotStage;
+    public Material vertex; //unused
 
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
@@ -235,7 +235,7 @@ public class IslandManage : MonoBehaviour
         }
         else
         {
-            if(n < tmpObjList.Count)
+            if (n < tmpObjList.Count)
                 tmpObjList.Remove(tmpObjList[n]);
         }
     }
@@ -283,27 +283,29 @@ public class IslandManage : MonoBehaviour
         Debug.Log("Load AI Object Successful.");
     }
 
-    void LoadMascot(GameObject island, string texName)
+    void LoadMascot(GameObject island)
     {
         //material
-        Texture texture = Resources.Load(Path.Combine("Texture", texName)) as Texture;
-        Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-        mascotMat.SetTexture("_BaseMap", texture);
+        Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));;
+        if (mascotTexName != null && mascotTexName != "")
+        {
+            Texture texture = Resources.Load(Path.Combine("Texture", mascotTexName)) as Texture; 
+            mascotMat.SetTexture("_BaseMap", texture);
+        }
 
         //stage
         List<(int, int)> spaceList = FindSpace(insideMap, 2);
         (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
         FillRegion(insideMap, coord.Item1, coord.Item2, 2);
 
-        GameObject addStage = Instantiate(mascotStage);
+        GameObject addStage = Instantiate(islandDic[islandBase].stagePrefab);
         addStage.transform.SetParent(island.transform, false);
         addStage.transform.localPosition = ObjPos(coord.Item1, coord.Item2, 2, 1);
 
         //mascot
-        GameObject addMascot = Instantiate(mascot);
+        GameObject addMascot = Instantiate(mascot[UnityEngine.Random.Range(0, mascot.Length)]);
         addMascot.GetComponent<MeshRenderer>().material = mascotMat;
         addMascot.transform.SetParent(addStage.transform, false);
-        addMascot.transform.localPosition = new Vector3(0, 2, 0);
         Debug.Log("Load Mascot with AI Texture Successful");
     }
 
@@ -326,7 +328,7 @@ public class IslandManage : MonoBehaviour
         // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
 
         //mascot
-        LoadMascot(island, "wood");
+        LoadMascot(island);
 
         //obj
         RndObj();
