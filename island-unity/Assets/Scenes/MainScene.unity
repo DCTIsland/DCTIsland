@@ -941,7 +941,7 @@ Camera:
   far clip plane: 3
   field of view: 60
   orthographic: 1
-  orthographic size: 0.7
+  orthographic size: 0.5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -966,7 +966,7 @@ Transform:
   m_GameObject: {fileID: 479470913}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.9459189, z: -0.32440326, w: 0}
-  m_LocalPosition: {x: 0, y: 0.94, z: 1.176}
+  m_LocalPosition: {x: 0, y: 0.88, z: 1.176}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -984,8 +984,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e94c083bc8fe4ca4eac0ba0ddb2a5cb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 720
-  height: 720
+  width: 1024
+  height: 1024
   path: Assets/Recordings
 --- !u!1001 &611602683
 PrefabInstance:
@@ -3253,6 +3253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3cc9ed05d0501349b5d98fd99122bc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  islandManage: {fileID: 1888225496}
 --- !u!4 &1927409960
 Transform:
   m_ObjectHideFlags: 0
