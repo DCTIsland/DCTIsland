@@ -30,6 +30,14 @@
         "com.google.firebase.auth": "12.5.0"
       }
     },
+    "com.google.firebase.storage": {
+      "version": "file:../PackageSource/com.google.firebase.storage-12.5.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.firebase.auth": "12.5.0"
+      }
+    },
     "com.unity.burst": {
       "version": "1.8.8",
       "depth": 1,
