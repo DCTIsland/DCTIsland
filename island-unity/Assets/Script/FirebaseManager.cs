@@ -2,11 +2,25 @@ using UnityEngine;
 using Firebase;
 using Firebase.Database;
 using Firebase.Extensions;
-using System.Linq;
+using Firebase.Storage;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class FirebaseDataThread
+{
+    public string emotion;
+    public string image_url;
+    public string link;
+    public string thread_id;
+    public string topic1;
+    public string topic2;
+    public string topic3;
+}
 
 public class FirebaseManager : MonoBehaviour
 {
-    private DatabaseReference databaseReference;
+    public IslandManage islandManage;
 
     void Start()
     {
@@ -28,17 +42,15 @@ public class FirebaseManager : MonoBehaviour
     void InitializeDatabase()
     {
         // 取得資料庫的根引用
-        databaseReference = FirebaseDatabase.DefaultInstance.RootReference;
+        DatabaseReference databaseReference = FirebaseDatabase.DefaultInstance.GetReference("threads");
 
         // 監聽 exampleNode 資料的變化
-        FirebaseDatabase.DefaultInstance
-            .GetReference("threads")
-            .ValueChanged += HandleValueChanged;
+        databaseReference.ChildAdded += HandleChildAdded;
 
         Debug.Log("資料庫監聽已啟動！");
     }
 
-    void HandleValueChanged(object sender, ValueChangedEventArgs e)
+    void HandleChildAdded(object sender, ChildChangedEventArgs e)
     {
         if (e.DatabaseError != null)
         {
@@ -49,31 +61,57 @@ public class FirebaseManager : MonoBehaviour
         // 確認有數據返回
         if (e.Snapshot != null && e.Snapshot.Value != null)
         {
-            // 取得所有資料的字典形式
-            var allData = e.Snapshot.Children.ToDictionary(
-                child => child.Key, 
-                child => child.Value
-            );
+            string key = e.Snapshot.Key; // 最新資料的 Key
+            string value = e.Snapshot.GetRawJsonValue(); // 最新資料的內容
 
-            // 找到最新的一筆資料（根據 Firebase 的資料順序，最後一個節點通常是最新的）
-            var latestChild = e.Snapshot.Children.LastOrDefault();
+            Debug.Log($"最新資料:{key}");
+            Debug.Log($"最新資料內容：{value}");
 
-            if (latestChild != null)
-            {
-                string latestKey = latestChild.Key;    // 最新資料的 Key
-                string latestValue = latestChild.GetRawJsonValue(); // 最新資料的內容
-
-                Debug.Log($"最新資料:{latestKey}");
-                Debug.Log($"最新資料內容：{latestValue}");
-            }
-            else
-            {
-                Debug.Log("沒有最新的資料。");
-            }
+            FirebaseDataThread valueObj = JsonUtility.FromJson<FirebaseDataThread>(value);
+            islandManage.AddToQueue(key, valueObj);
         }
         else
         {
             Debug.Log("資料庫中沒有數據。");
         }
+    }
+
+    public void UploadToStorage(byte[] pngData, string thread_id)
+    {
+        FirebaseStorage storage = FirebaseStorage.DefaultInstance;
+        StorageReference storageRef = storage.GetReferenceFromUrl("gs://dctdb-8c8ad.firebasestorage.app");
+        StorageReference snapshotRef = storageRef.Child($"snapshots/{thread_id}.png");
+
+        var pngMetadata = new MetadataChange();
+        pngMetadata.ContentType = "image/png";
+
+        snapshotRef.PutBytesAsync(pngData, pngMetadata).ContinueWith((Task<StorageMetadata> task) =>
+        {
+            if (task.IsFaulted || task.IsCanceled)
+            {
+                Debug.LogError("Error to upload snapshot: " + task.Exception.ToString());
+            }
+            else
+            {
+                Debug.Log("Upload snapshot successful");
+            }
+        });
+    }
+
+    public void UpdateDB(string key, string thread_id)
+    {
+        DatabaseReference databaseReference = FirebaseDatabase.DefaultInstance.GetReference("threads");
+        DatabaseReference updateRef = databaseReference.Child(key);
+
+        Dictionary<string, object> data = new Dictionary<string, object>();
+        data["snapshot_url"] = $"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/snapshots%2F{thread_id}.png?alt=media";
+
+        updateRef.UpdateChildrenAsync(data).ContinueWith(task =>
+        {
+            if (task.IsFaulted)
+                Debug.LogError("Error update database: " + task.Exception);
+            else
+                Debug.Log("Update database Successful");
+        });
     }
 }

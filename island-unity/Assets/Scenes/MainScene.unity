@@ -987,6 +987,7 @@ MonoBehaviour:
   width: 1024
   height: 1024
   path: Assets/Recordings
+  firebaseManager: {fileID: 1927409959}
 --- !u!1001 &611602683
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3136,6 +3137,7 @@ MonoBehaviour:
   thread_id: 
   islandBase: 0
   mascotTexName: 
+  mascotTexUrl: 
   vertex: {fileID: 2100000, guid: 0b936cbce16e515438047a2675a59692, type: 2}
   snapshot: {fileID: 479470918}
 --- !u!1001 &1899416994
