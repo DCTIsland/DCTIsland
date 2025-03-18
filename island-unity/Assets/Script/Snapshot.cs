@@ -63,6 +63,5 @@ public class Snapshot : MonoBehaviour
 
         //File.WriteAllBytes($"{path}/{name}.png", pngData);
         firebaseManager.UploadToStorage(pngData, name);
-        firebaseManager.UpdateDB(key, name);
     }
 }
