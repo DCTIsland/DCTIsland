@@ -1,5 +1,10 @@
 {
   "dependencies": {
+    "com.google.external-dependency-manager": "file:../PackageSource/com.google.external-dependency-manager-1.2.183.tgz",
+    "com.google.firebase.app": "file:../PackageSource/com.google.firebase.app-12.5.0.tgz",
+    "com.google.firebase.auth": "file:../PackageSource/com.google.firebase.auth-12.5.0.tgz",
+    "com.google.firebase.database": "file:../PackageSource/com.google.firebase.database-12.5.0.tgz",
+    "com.google.firebase.storage": "file:../PackageSource/com.google.firebase.storage-12.5.0.tgz",
     "com.unity.cloud.gltfast": "6.10.2",
     "com.unity.collab-proxy": "2.5.2",
     "com.unity.editorcoroutines": "1.0.0",

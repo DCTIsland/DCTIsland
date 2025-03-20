@@ -6,15 +6,18 @@ using UnityEngine;
 
 public class Snapshot : MonoBehaviour
 {
-    public int width = 720;
-    public int height = 720;
+    public int width = 1024;
+    public int height = 1024;
     public string path = "Assets/Recordings";
 
-    public void DoTakeSnapshot(string id, Action callback)
+    public FirebaseManager firebaseManager;
+
+    public void DoTakeSnapshot(string key, string thread_id, Action callback)
     {
         Camera cam = gameObject.GetComponent<Camera>();
         var tex = TakeSnapshot(cam, width, height);
-        SaveTexture(tex, path, id);
+        SaveTexture(tex, thread_id, key);
+        Debug.Log("Take snapshot successful");
         callback.Invoke();
     }
 
@@ -53,10 +56,12 @@ public class Snapshot : MonoBehaviour
         tex.SetPixels32(color);
     }
 
-    static void SaveTexture(Texture2D texture, string path, string name)
+    void SaveTexture(Texture2D texture, string name, string key)
     {
         MakePNGAlpha(texture);
         byte[] pngData = texture.EncodeToPNG();
-        File.WriteAllBytes($"{path}/{name}.png", pngData);
+
+        //File.WriteAllBytes($"{path}/{name}.png", pngData);
+        firebaseManager.UploadToStorage(pngData, name);
     }
 }

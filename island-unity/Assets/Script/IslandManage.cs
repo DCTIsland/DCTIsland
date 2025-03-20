@@ -5,10 +5,17 @@ using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using System;
+using UnityEngine.Networking;
 
 public enum IslandType
 {
     concrete, desert, grass, ice, lava
+}
+
+public class IslandSet
+{
+    public string key;
+    public FirebaseDataThread value;
 }
 
 public class IslandManage : MonoBehaviour
@@ -25,12 +32,18 @@ public class IslandManage : MonoBehaviour
     public GameObject[] mascot;
 
     [Header("Island set:")]
+    //這坨晚點再改改
     public string id;
     public string thread_id;
     public IslandType islandBase;
     public string mascotTexName;
+    public string mascotTexUrl;
     Obj[] islandObj = new Obj[3];
     public Material vertex; //unused
+
+
+    Queue<IslandSet> IslandSetQueue = new Queue<IslandSet>();
+    bool isProcess = false;
 
     Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
     Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
@@ -77,6 +90,54 @@ public class IslandManage : MonoBehaviour
             {1, 0, 0, 0, 0, 0, 0, 1},
             {1, 1, 1, 0, 0, 1, 1, 1}
         };
+    }
+
+    public void AddToQueue(string key, FirebaseDataThread value)
+    {
+        IslandSet islandSet = new IslandSet{key = key, value = value};
+        IslandSetQueue.Enqueue(islandSet);
+        ProcessQueue();
+    }
+
+    void ProcessQueue()
+    {
+        if(isProcess || IslandSetQueue.Count == 0)
+            return;
+        
+        isProcess = true;
+        IslandSet data = IslandSetQueue.Dequeue();
+
+        id = data.key;
+        thread_id = data.value.thread_id;
+        islandBase = EmotionToIslT(data.value.emotion);
+        mascotTexUrl = TexUrl(data.value.thread_id);
+        
+        StartCoroutine(LoadIsland());
+    }
+
+    IslandType EmotionToIslT(string emotion)
+    {
+        switch (emotion)
+        {
+            case "Happiness":
+                return IslandType.grass;
+            case "Sadness":
+                return IslandType.ice;
+            case "Anger":
+                return IslandType.lava;
+            case "Fear":
+                return IslandType.desert;
+            case "Disgust":
+                return IslandType.concrete;
+            default:
+                Debug.Log("Unexpect Emotion");
+                return IslandType.grass;
+        }
+    }
+
+    string TexUrl(string filename)
+    {
+        return $"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/textures%2F{filename}.png?alt=media";
     }
 
     Vector3 RndIslandPos()
@@ -283,30 +344,63 @@ public class IslandManage : MonoBehaviour
         Debug.Log("Load AI Object Successful.");
     }
 
-    void LoadMascot(GameObject island)
+    Vector3 SetStagePos()
     {
-        //material
-        Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));;
-        if (mascotTexName != null && mascotTexName != "")
-        {
-            Texture texture = Resources.Load(Path.Combine("Texture", mascotTexName)) as Texture; 
-            mascotMat.SetTexture("_BaseMap", texture);
-        }
-
-        //stage
         List<(int, int)> spaceList = FindSpace(insideMap, 2);
         (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
         FillRegion(insideMap, coord.Item1, coord.Item2, 2);
+        return ObjPos(coord.Item1, coord.Item2, 2, 1);
+    }
 
+    GameObject LoadStage(GameObject island, Vector3 stagePos)
+    {
         GameObject addStage = Instantiate(islandDic[islandBase].stagePrefab);
         addStage.transform.SetParent(island.transform, false);
-        addStage.transform.localPosition = ObjPos(coord.Item1, coord.Item2, 2, 1);
+        addStage.transform.localPosition = stagePos;
+        return addStage;
+    }
+
+    void LoadMascot(GameObject stage, Material mascotMat)
+    {
+        //material, load texture from resource
+        // Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));;
+        // if (mascotTexName != null && mascotTexName != "")
+        // {
+        //     Texture texture = Resources.Load(Path.Combine("Textures", mascotTexName)) as Texture; 
+        //     mascotMat.SetTexture("_BaseMap", texture);
+        // }
 
         //mascot
         GameObject addMascot = Instantiate(mascot[UnityEngine.Random.Range(0, mascot.Length)]);
         addMascot.GetComponent<MeshRenderer>().material = mascotMat;
-        addMascot.transform.SetParent(addStage.transform, false);
+        addMascot.transform.SetParent(stage.transform, false);
         Debug.Log("Load Mascot with AI Texture Successful");
+    }
+
+    IEnumerator LoadImgFromUrl(string url, GameObject stage)
+    {
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Texture2D texture = DownloadHandlerTexture.GetContent(request);
+
+            //store png
+            // string path = "Assets/Resources/Textures";
+            // byte[] pngData = texture.EncodeToPNG();
+            // File.WriteAllBytes($"{path}/{id}.png", pngData);
+            // AssetDatabase.Refresh();
+
+            Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            mascotMat.SetTexture("_BaseMap", texture);
+            LoadMascot(stage, mascotMat);
+        }
+        else
+        {
+            Debug.LogError("Failed to load image: " + request.error);
+            Debug.LogError("Response: " + request.downloadHandler.text);
+        }
     }
 
     void IslandToPos(GameObject island)
@@ -316,7 +410,7 @@ public class IslandManage : MonoBehaviour
         island.transform.DOLocalMoveY(pos.y, 1);
     }
 
-    public void LoadIsland()
+    public IEnumerator LoadIsland()
     {
         //gen island base
         GameObject island = Instantiate(islandDic[islandBase].basePrefab, new Vector3(0, -100, 0), Quaternion.identity);
@@ -327,16 +421,22 @@ public class IslandManage : MonoBehaviour
         // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
         // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
 
-        //mascot
-        LoadMascot(island);
+        //mascot stage
+        Vector3 stagePos = SetStagePos();
+        GameObject stage = LoadStage(island, stagePos);
 
         //obj
         RndObj();
         LoadObj(island);
         Array.Clear(islandObj, 0, 3);
 
+        //mascot texture
+        yield return StartCoroutine(LoadImgFromUrl(mascotTexUrl, stage));
+
         //snapshot
-        snapshot.DoTakeSnapshot(id, () => IslandToPos(island));
+        snapshot.DoTakeSnapshot(id, thread_id, () => IslandToPos(island));
+        isProcess = false;
+        ProcessQueue();
     }
 
     void OnEnable()
@@ -346,15 +446,4 @@ public class IslandManage : MonoBehaviour
         initInsideMap();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }
