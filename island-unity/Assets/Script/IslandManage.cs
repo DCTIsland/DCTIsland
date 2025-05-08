@@ -222,7 +222,7 @@ public class IslandManage : MonoBehaviour
 
     Vector2Int[] GetOffset(Vector2Int newIPos)
     {
-        Vector2Int[] offsets = new Vector2Int[6];
+        Vector2Int[] offsets;
 
         if (newIPos.x <= 3)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -2), new(-1, -1), new(1, 1), new(1, 2) };
