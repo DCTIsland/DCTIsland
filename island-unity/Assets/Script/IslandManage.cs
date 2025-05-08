@@ -1,11 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 using System;
-using UnityEngine.Networking;
 
 public enum IslandType
 {
@@ -20,56 +17,50 @@ public class IslandSet
 
 public class IslandManage : MonoBehaviour
 {
-    struct Obj
-    {
-        public GameObject objPrefab;
-        public Quaternion rotation;
-        public Vector3 position;
-    }
-
     [Header("Island assets:")]
     public IslandData[] islandDatas;
     public GameObject[] mascot;
-
-    [Header("Island set:")]
-    //這坨晚點再改改
-    public string id;
-    public string thread_id;
-    public IslandType islandBase;
-    public string mascotTexName;
-    public string mascotTexUrl;
-    Obj[] islandObj = new Obj[3];
-    public Material vertex; //unused
-
+    Dictionary<IslandType, IslandData> islandDic = new Dictionary<IslandType, IslandData>();
 
     Queue<IslandSet> IslandSetQueue = new Queue<IslandSet>();
     bool isProcess = false;
 
-    Dictionary<Vector2, IslandType> islandMap = new Dictionary<Vector2, IslandType>();
-    Dictionary<IslandType, List<Vector2>> islandNext = new Dictionary<IslandType, List<Vector2>>();
-    Dictionary<IslandType, IslandData> islandDic = new Dictionary<IslandType, IslandData>();
+    int[][] map = new int[15][];
+    Dictionary<IslandType, List<Vector2Int>> islandNext = new Dictionary<IslandType, List<Vector2Int>>();
 
-    int[,] insideMap;
     public Snapshot snapshot;
 
-    void initIslandMap()
+    void Awake()
     {
-        islandMap.Add(new Vector2(0, 0), IslandType.concrete);
-        islandMap.Add(new Vector2(1, -1), IslandType.concrete);
-        islandMap.Add(new Vector2(-1, -1), IslandType.concrete);
-        islandMap.Add(new Vector2(2, 0), IslandType.desert);
-        islandMap.Add(new Vector2(-2, 0), IslandType.grass);
-        islandMap.Add(new Vector2(1, 1), IslandType.ice);
-        islandMap.Add(new Vector2(-1, 1), IslandType.lava);
-
-        islandNext.Add(IslandType.concrete, new List<Vector2>() { new Vector2(2, -2), new Vector2(0, -2), new Vector2(-2, -2) });
-        islandNext.Add(IslandType.desert, new List<Vector2>() { new Vector2(3, -1), new Vector2(4, 0), new Vector2(3, 1) });
-        islandNext.Add(IslandType.grass, new List<Vector2>() { new Vector2(-3, -1), new Vector2(-4, 0), new Vector2(-3, 1) });
-        islandNext.Add(IslandType.ice, new List<Vector2>() { new Vector2(3, 1), new Vector2(2, 2), new Vector2(0, 2) });
-        islandNext.Add(IslandType.lava, new List<Vector2>() { new Vector2(-3, 1), new Vector2(-2, 2), new Vector2(0, 2) });
+        InitMap();
+        SetupIslandDic();
     }
 
-    void initIslandDic()
+    void InitMap()
+    {
+        int[] rowSizes = { 6, 9, 12, 15, 18, 19, 18, 19, 18, 19, 18, 15, 12, 9, 6 };
+        for (int i = 0; i < 15; i++)
+        {
+            map[i] = new int[rowSizes[i]];
+            Array.Fill(map[i], -1);
+        }
+
+        map[6][8] = (int)IslandType.concrete;
+        map[6][9] = (int)IslandType.concrete;
+        map[7][8] = (int)IslandType.desert;
+        map[7][9] = (int)IslandType.concrete;
+        map[7][10] = (int)IslandType.grass;
+        map[8][8] = (int)IslandType.ice;
+        map[8][9] = (int)IslandType.lava;
+
+        islandNext.Add(IslandType.concrete, new List<Vector2Int>() { new(5, 8), new(5, 9), new(5, 10) });
+        islandNext.Add(IslandType.desert, new List<Vector2Int>() { new(6, 7), new(7, 7), new(8, 7) });
+        islandNext.Add(IslandType.grass, new List<Vector2Int>() { new(6, 10), new(7, 11), new(8, 10) });
+        islandNext.Add(IslandType.ice, new List<Vector2Int>() { new(8, 7), new(9, 8), new(9, 9) });
+        islandNext.Add(IslandType.lava, new List<Vector2Int>() { new(7, 10), new(7, 10), new(9, 9) });
+    }
+
+    void SetupIslandDic()
     {
         foreach (var data in islandDatas)
         {
@@ -77,42 +68,48 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    void initInsideMap()
-    {
-        insideMap = new int[8, 8]
-        {
-            {1, 1, 1, 0, 0, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0, 0},
-            {1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 1, 1, 0, 0, 1, 1, 1}
-        };
-    }
-
     public void AddToQueue(string key, FirebaseDataThread value)
     {
-        IslandSet islandSet = new IslandSet{key = key, value = value};
+        IslandSet islandSet = new() { key = key, value = value };
         IslandSetQueue.Enqueue(islandSet);
         ProcessQueue();
     }
 
     void ProcessQueue()
     {
-        if(isProcess || IslandSetQueue.Count == 0)
+        if (isProcess || IslandSetQueue.Count == 0)
             return;
-        
+
         isProcess = true;
         IslandSet data = IslandSetQueue.Dequeue();
 
-        id = data.key;
-        thread_id = data.value.thread_id;
-        islandBase = EmotionToIslT(data.value.emotion);
-        mascotTexUrl = TexUrl(data.value.thread_id);
-        
-        StartCoroutine(LoadIsland());
+        StartCoroutine(LoadIsland(data));
+    }
+
+    public IEnumerator LoadIsland(IslandSet data)
+    {
+        //gen island base
+        IslandType islandBase = EmotionToIslT(data.value.emotion);
+        GameObject island = Instantiate(islandDic[islandBase].basePrefab, new Vector3(0, -100, 0), Quaternion.identity);
+        island.transform.SetParent(gameObject.transform);
+        island.name = data.key;
+
+        //setup island
+        var islandScript = island.transform.GetComponent<Island>();
+        islandScript.SetInfo(data, islandBase);
+        islandScript.SetupTool(islandDatas, mascot, snapshot);
+
+        //after snapshot
+        yield return islandScript.AddAllObj();
+
+        //to pos
+        Vector3 pos = RndIslandPos(islandBase);
+        island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
+        island.transform.DOLocalMoveY(pos.y, 1);
+
+        //next process
+        isProcess = false;
+        ProcessQueue();
     }
 
     IslandType EmotionToIslT(string emotion)
@@ -135,315 +132,118 @@ public class IslandManage : MonoBehaviour
         }
     }
 
-    string TexUrl(string filename)
+    //map record whole
+    //next record next possible pos
+    //if next empty, random choose from other type
+    Vector3 RndIslandPos(IslandType islandBase)
     {
-        return $"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/textures%2F{filename}.png?alt=media";
-    }
-
-    Vector3 RndIslandPos()
-    {
-        List<Vector2> nextList = islandNext[islandBase];
-        Vector2 rndNext;
+        IslandType baseIndex = islandBase;
+        List<Vector2Int> nextList = islandNext[baseIndex];
+        Vector2Int rndNext;
 
         //choose and check exist
         while (true)
         {
-            rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
-            if (islandMap.ContainsKey(rndNext) == false)
+            if (nextList.Count != 0)
             {
-                break;
+                rndNext = nextList[UnityEngine.Random.Range(0, nextList.Count)];
+                if (map[rndNext.x][rndNext.y] == -1)
+                    break;
+                else
+                    nextList.Remove(rndNext);
             }
             else
             {
-                nextList.Remove(rndNext);
-                islandNext[islandBase].Remove(rndNext);
+                if ((int)islandBase >= 4)
+                    baseIndex = IslandType.concrete;
+                else
+                    baseIndex++;
             }
         }
 
-        float x = rndNext.x / 2 == 0 ? rndNext.x * 0.86f : rndNext.x * 0.43f;
-        float z = rndNext.y * 0.75f;
-        Vector3 pos = new Vector3(x, 0, z);
+        Debug.Log($"Island x: {rndNext.x}, y: {rndNext.y}");
 
-        UpdIslandDic(rndNext);
+        //to unity pos
+        float x0;
+        if (rndNext.x >= 4 && rndNext.x <= 10)
+        {
+            x0 = rndNext.x % 2 == 0 ? -0.43f : 0;
+        }
+        else if (rndNext.x < 4)
+        {
+            x0 = ((4 - rndNext.x) * 3 + 1) * -0.43f;
+        }
+        else
+        {
+            x0 = ((rndNext.x - 10) * 3 + 1) * -0.43f;
+        }
+
+        float z = rndNext.x * 0.75f;
+        float x = x0 - rndNext.y * 0.86f;
+        Vector3 pos = new(x, 0, z);
+
+        Debug.Log($"Island unity x: {x}, z: {z}");
+
+        //update map data
+        nextList.Remove(rndNext);
+        map[rndNext.x][rndNext.y] = (int)islandBase;
+        UpdateNext(rndNext, islandBase);
 
         return pos;
     }
 
-    void UpdIslandDic(Vector2 newIPos)
+    void UpdateNext(Vector2Int newIPos, IslandType islandBase)
     {
-        islandNext[islandBase].Remove(newIPos);
-        islandMap.Add(newIPos, islandBase);
+        List<Vector2Int> neighbors = new();
+        Vector2Int[] offsets = GetOffset(newIPos);
 
-        Vector3[] neighbors = {
-            new Vector3(newIPos.x + 2, newIPos.y),
-            new Vector3(newIPos.x - 2, newIPos.y),
-            new Vector3(newIPos.x + 1, newIPos.y + 1),
-            new Vector3(newIPos.x - 1, newIPos.y + 1),
-            new Vector3(newIPos.x + 1, newIPos.y - 1),
-            new Vector3(newIPos.x - 1, newIPos.y - 1),
-        };
-
-        foreach (Vector3 neighbor in neighbors)
+        //offset valid
+        foreach (Vector2Int offset in offsets)
         {
-            bool inMap = islandMap.ContainsKey(neighbor);
-            bool inNext = islandNext[islandBase].Contains(neighbor);
-            if (inMap == false && inNext == false)
+            int x = newIPos.x + offset.x;
+            int y = newIPos.y + offset.y;
+
+            if (x > 0 && x < 15 && y > 0 && y < map[x].Length)
+            {
+                neighbors.Add(new(x, y));
+            }
+        }
+
+        //add neighbor to next
+        foreach (Vector2Int neighbor in neighbors)
+        {
+            if (map[neighbor.x][neighbor.y] == -1 &&
+            !islandNext[islandBase].Contains(neighbor))
             {
                 islandNext[islandBase].Add(neighbor);
             }
         }
     }
 
-    List<(int, int)> FindSpace(int[,] grid, int k)
+    Vector2Int[] GetOffset(Vector2Int newIPos)
     {
-        List<(int, int)> emptySpaces = new List<(int, int)>();
-        for (int i = 0; i < 8 - k; i++)
-        {
-            for (int j = 0; j < 8 - k; j++)
-            {
-                if (isEmptyRegion(grid, i, j, k) == true)
-                    emptySpaces.Add((i, j));
-            }
-        }
+        Vector2Int[] offsets = new Vector2Int[6];
 
-        return emptySpaces;
-    }
+        if (newIPos.x <= 3)
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -2), new(-1, -1), new(1, 1), new(1, 2) };
 
-    bool isEmptyRegion(int[,] grid, int x, int y, int k)
-    {
-        for (int i = x; i < x + k; i++)
-        {
-            for (int j = y; j < y + k; j++)
-            {
-                if (grid[i, j] == 1)
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    void FillRegion(int[,] grid, int x, int y, int k)
-    {
-        Debug.Log($"Fill x: {x}, y: {y}");
-
-        for (int i = x; i < x + k; i++)
-        {
-            for (int j = y; j < y + k; j++)
-            {
-                grid[i, j] = 1;
-            }
-        }
-    }
-
-    void RndObj()
-    {
-        List<ObjectData> tmpObjList = islandDic[islandBase].objects
-            .Select(obj => new ObjectData { prefab = obj.prefab, sideLen = obj.sideLen })
-            .ToList();
-
-        bool isSpecialType = islandBase == IslandType.concrete || islandBase == IslandType.desert || islandBase == IslandType.ice;
-        int current = 0;
-        int objN;
-
-        while (current < 3)
-        {
-            if (current == 0 && isSpecialType)
-            {
-                int rnd = UnityEngine.Random.Range(0, 100);
-                if (rnd >= 50)
-                {
-                    objN = rnd > 70 ? tmpObjList.Count - 2 : tmpObjList.Count - 1;
-                }
-                else
-                {
-                    objN = UnityEngine.Random.Range(0, tmpObjList.Count - 2);
-                }
-
-                tmpObjList.Remove(tmpObjList[^2]);
-                tmpObjList.Remove(tmpObjList[^1]);
-            }
-            else
-            {
-                objN = UnityEngine.Random.Range(0, tmpObjList.Count);
-            }
-
-            addObjList(ref current, objN, insideMap, tmpObjList);
-
-            if (tmpObjList.Count == 0)
-                break;
-        }
-
-        initInsideMap();
-    }
-
-    void addObjList(ref int current, int n, int[,] map, List<ObjectData> tmpObjList)
-    {
-        ObjectData[] objects = islandDic[islandBase].objects;
-        List<(int, int)> spaceList = FindSpace(map, objects[n].sideLen);
-
-        if (spaceList.Count != 0)
-        {
-            (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
-            islandObj[current] = new Obj
-            {
-                objPrefab = objects[n].prefab,
-                rotation = Quaternion.identity,
-                position = ObjPos(coord.Item1, coord.Item2, objects[n].sideLen)
-            };
-
-            FillRegion(map, coord.Item1, coord.Item2, objects[n].sideLen);
-            current++;
-        }
+        else if (newIPos.x == 4)       
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -2), new(-1, -1), new(1, 0), new(1, 1) };
+        
+        else if (newIPos.x == 5 || newIPos.x == 7 || newIPos.x == 9)
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -1), new(-1, 0), new(1, -1), new(1, 0) };
+        
+        else if (newIPos.x == 6 || newIPos.x == 8)
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 0), new(-1, 1), new(1, 0), new(1, 1) };
+        
+        else if (newIPos.x == 10)
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 0), new(-1, 1), new(1, -2), new(1, -1) };
+        
         else
-        {
-            if (n < tmpObjList.Count)
-                tmpObjList.Remove(tmpObjList[n]);
-        }
-    }
+            offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 1), new(-1, 2), new(1, -2), new(1, -1) };
+        
 
-    Vector3 ObjPos(int x, int y, int side, float posY = 0.7f)
-    {
-        float posZ = x - 4 + side * 0.5f;
-        float posX = y + (-2 * y + 4) - side * 0.5f;
-        return new Vector3(posX, posY, posZ);
-    }
-
-    void LoadObj(GameObject island)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            if (islandObj[i].objPrefab != null)
-            {
-                GameObject obj = Instantiate(islandObj[i].objPrefab);
-                obj.transform.SetParent(island.transform, false);
-                obj.transform.localPosition = islandObj[i].position;
-                obj.transform.localRotation = islandObj[i].rotation;
-            }
-        }
-    }
-
-    Vector3 RndAiObjPos()
-    {
-        float x = UnityEngine.Random.Range(-1.0f, 1.0f);
-        float z = UnityEngine.Random.Range(-1.0f, 1.0f);
-        Vector3 pos = new Vector3(x, 3, z);
-        return pos;
-    }
-
-    [System.Obsolete]
-    void LoadAiObj(GameObject island, string objName)
-    {
-        GameObject aiobj = Resources.Load(Path.Combine("Models", objName)) as GameObject;
-        GameObject instobj = Instantiate(aiobj);
-        instobj.GetComponent<MeshRenderer>().material = vertex;
-        instobj.AddComponent<Rigidbody>();
-        instobj.AddComponent<BoxCollider>();
-        instobj.transform.SetParent(island.transform, false);
-        instobj.transform.localPosition = RndAiObjPos();
-        instobj.name = objName;
-        Debug.Log("Load AI Object Successful.");
-    }
-
-    Vector3 SetStagePos()
-    {
-        List<(int, int)> spaceList = FindSpace(insideMap, 2);
-        (int, int) coord = spaceList[UnityEngine.Random.Range(0, spaceList.Count)];
-        FillRegion(insideMap, coord.Item1, coord.Item2, 2);
-        return ObjPos(coord.Item1, coord.Item2, 2, 1);
-    }
-
-    GameObject LoadStage(GameObject island, Vector3 stagePos)
-    {
-        GameObject addStage = Instantiate(islandDic[islandBase].stagePrefab);
-        addStage.transform.SetParent(island.transform, false);
-        addStage.transform.localPosition = stagePos;
-        return addStage;
-    }
-
-    void LoadMascot(GameObject stage, Material mascotMat)
-    {
-        //material, load texture from resource
-        // Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));;
-        // if (mascotTexName != null && mascotTexName != "")
-        // {
-        //     Texture texture = Resources.Load(Path.Combine("Textures", mascotTexName)) as Texture; 
-        //     mascotMat.SetTexture("_BaseMap", texture);
-        // }
-
-        //mascot
-        GameObject addMascot = Instantiate(mascot[UnityEngine.Random.Range(0, mascot.Length)]);
-        addMascot.GetComponent<MeshRenderer>().material = mascotMat;
-        addMascot.transform.SetParent(stage.transform, false);
-        Debug.Log("Load Mascot with AI Texture Successful");
-    }
-
-    IEnumerator LoadImgFromUrl(string url, GameObject stage)
-    {
-        UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Texture2D texture = DownloadHandlerTexture.GetContent(request);
-
-            //store png
-            // string path = "Assets/Resources/Textures";
-            // byte[] pngData = texture.EncodeToPNG();
-            // File.WriteAllBytes($"{path}/{id}.png", pngData);
-            // AssetDatabase.Refresh();
-
-            Material mascotMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            mascotMat.SetTexture("_BaseMap", texture);
-            LoadMascot(stage, mascotMat);
-        }
-        else
-        {
-            Debug.LogError("Failed to load image: " + request.error);
-            Debug.LogError("Response: " + request.downloadHandler.text);
-        }
-    }
-
-    void IslandToPos(GameObject island)
-    {
-        Vector3 pos = RndIslandPos();
-        island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
-        island.transform.DOLocalMoveY(pos.y, 1);
-    }
-
-    public IEnumerator LoadIsland()
-    {
-        //gen island base
-        GameObject island = Instantiate(islandDic[islandBase].basePrefab, new Vector3(0, -100, 0), Quaternion.identity);
-        island.transform.SetParent(gameObject.transform);
-        island.name = id;
-
-        //ai obj
-        // GenerateAIObj genai = gameObject.GetComponent<GenerateAIObj>();
-        // genai.GenAIobj((aiObjName) => LoadAiObj(island, aiObjName));
-
-        //mascot stage
-        Vector3 stagePos = SetStagePos();
-        GameObject stage = LoadStage(island, stagePos);
-
-        //obj
-        RndObj();
-        LoadObj(island);
-        Array.Clear(islandObj, 0, 3);
-
-        //mascot texture
-        yield return StartCoroutine(LoadImgFromUrl(mascotTexUrl, stage));
-
-        //snapshot
-        snapshot.DoTakeSnapshot(id, thread_id, () => IslandToPos(island));
-        isProcess = false;
-        ProcessQueue();
-    }
-
-    void OnEnable()
-    {
-        initIslandMap();
-        initIslandDic();
-        initInsideMap();
+        return offsets;
     }
 
 }
