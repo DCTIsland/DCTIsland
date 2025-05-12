@@ -17,17 +17,21 @@ public class IslandSet
 
 public class IslandManage : MonoBehaviour
 {
-    [Header("Island assets:")]
+    // island asset
     public IslandData[] islandDatas;
     public GameObject[] mascot;
     Dictionary<IslandType, IslandData> islandDic = new Dictionary<IslandType, IslandData>();
 
+    //proccess queue
     Queue<IslandSet> IslandSetQueue = new Queue<IslandSet>();
     bool isProcess = false;
 
+    // data about map
     int[][] map = new int[15][];
     Dictionary<IslandType, List<Vector2Int>> islandNext = new Dictionary<IslandType, List<Vector2Int>>();
+    Queue<GameObject> islandInWorldQueue = new Queue<GameObject>();
 
+    // snapshot
     public Snapshot snapshot;
 
     void Awake()
@@ -93,19 +97,29 @@ public class IslandManage : MonoBehaviour
         GameObject island = Instantiate(islandDic[islandBase].basePrefab, new Vector3(0, -100, 0), Quaternion.identity);
         island.transform.SetParent(gameObject.transform);
         island.name = data.key;
+        Vector2Int mapPos = RndIslandPos(islandBase);
 
         //setup island
         var islandScript = island.transform.GetComponent<Island>();
-        islandScript.SetInfo(data, islandBase);
+        islandScript.SetInfo(islandBase, mapPos, data);
         islandScript.SetupTool(islandDatas, mascot, snapshot);
 
         //after snapshot
         yield return islandScript.AddAllObj();
 
         //to pos
-        Vector3 pos = RndIslandPos(islandBase);
+        Vector3 pos = MapPosToUnityPos(mapPos);
         island.transform.localPosition = new Vector3(pos.x, -0.5f, pos.z);
         island.transform.DOLocalMoveY(pos.y, 1);
+
+        // add to data queue
+        islandInWorldQueue.Enqueue(island);
+
+        // destroy some island
+        if (islandInWorldQueue.Count > 150)
+        {
+            Quake(20);
+        }
 
         //next process
         isProcess = false;
@@ -135,7 +149,7 @@ public class IslandManage : MonoBehaviour
     //map record whole
     //next record next possible pos
     //if next empty, random choose from other type
-    Vector3 RndIslandPos(IslandType islandBase)
+    Vector2Int RndIslandPos(IslandType islandBase)
     {
         IslandType baseIndex = islandBase;
         List<Vector2Int> nextList = islandNext[baseIndex];
@@ -163,33 +177,36 @@ public class IslandManage : MonoBehaviour
 
         Debug.Log($"Island x: {rndNext.x}, y: {rndNext.y}");
 
-        //to unity pos
-        float x0;
-        if (rndNext.x >= 4 && rndNext.x <= 10)
-        {
-            x0 = rndNext.x % 2 == 0 ? -0.43f : 0;
-        }
-        else if (rndNext.x < 4)
-        {
-            x0 = ((4 - rndNext.x) * 3 + 1) * -0.43f;
-        }
-        else
-        {
-            x0 = ((rndNext.x - 10) * 3 + 1) * -0.43f;
-        }
-
-        float z = rndNext.x * 0.75f;
-        float x = x0 - rndNext.y * 0.86f;
-        Vector3 pos = new(x, 0, z);
-
-        Debug.Log($"Island unity x: {x}, z: {z}");
-
         //update map data
         nextList.Remove(rndNext);
         map[rndNext.x][rndNext.y] = (int)islandBase;
         UpdateNext(rndNext, islandBase);
 
-        return pos;
+        return rndNext;
+    }
+
+    Vector3 MapPosToUnityPos(Vector2Int pos)
+    {
+        float x0;
+        if (pos.x >= 4 && pos.x <= 10)
+        {
+            x0 = pos.x % 2 == 0 ? -0.43f : 0;
+        }
+        else if (pos.x < 4)
+        {
+            x0 = ((4 - pos.x) * 3 + 1) * -0.43f;
+        }
+        else
+        {
+            x0 = ((pos.x - 10) * 3 + 1) * -0.43f;
+        }
+
+        float z = pos.x * 0.75f;
+        float x = x0 - pos.y * 0.86f;
+
+        Debug.Log($"Island unity x: {x}, z: {z}");
+
+        return new Vector3(x, 0, z);
     }
 
     void UpdateNext(Vector2Int newIPos, IslandType islandBase)
@@ -227,23 +244,54 @@ public class IslandManage : MonoBehaviour
         if (newIPos.x <= 3)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -2), new(-1, -1), new(1, 1), new(1, 2) };
 
-        else if (newIPos.x == 4)       
+        else if (newIPos.x == 4)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -2), new(-1, -1), new(1, 0), new(1, 1) };
-        
+
         else if (newIPos.x == 5 || newIPos.x == 7 || newIPos.x == 9)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, -1), new(-1, 0), new(1, -1), new(1, 0) };
-        
+
         else if (newIPos.x == 6 || newIPos.x == 8)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 0), new(-1, 1), new(1, 0), new(1, 1) };
-        
+
         else if (newIPos.x == 10)
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 0), new(-1, 1), new(1, -2), new(1, -1) };
-        
+
         else
             offsets = new Vector2Int[] { new(0, -1), new(0, 1), new(-1, 1), new(-1, 2), new(1, -2), new(1, -1) };
-        
+
 
         return offsets;
+    }
+
+    //島嶼最多是213個
+    //在島嶼達到150個後，會開始隨機生成地震
+    //150個以上地震機率30%，180以上機率60%，200以上機率80%，210機率100%
+
+    //記錄島嶼生成順序 queue
+    //從最早生成的島，一次震掉它及周邊20-50個島嶼
+    public void Quake(int n = 1)
+    {
+        if (islandInWorldQueue.Count <= 0)
+            return;
+
+        for (int i = 0; i < n; i++)
+        {
+            GameObject island = islandInWorldQueue.Dequeue();
+
+            // update map data
+            var islandScript = island.GetComponent<Island>();
+            Vector2Int mapPos = islandScript.worldPos;
+            map[mapPos.x][mapPos.y] = -1;
+            islandNext[islandScript.islandBase].Add(mapPos);
+
+            Debug.Log($"Destroy island ({mapPos.x}, {mapPos.y}) ");
+
+            //destroy island
+            island.transform.DOLocalMoveY(-1, 1).OnComplete(() =>
+            {
+                Destroy(island);
+            });
+        }
     }
 
 }

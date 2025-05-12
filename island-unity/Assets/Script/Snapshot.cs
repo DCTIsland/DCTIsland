@@ -60,7 +60,7 @@ public class Snapshot : MonoBehaviour
         MakePNGAlpha(texture);
         byte[] pngData = texture.EncodeToPNG();
 
-        File.WriteAllBytes($"{path}/{name}.png", pngData);
-        //firebaseManager.UploadToStorage(pngData, name);
+        //File.WriteAllBytes($"{path}/{name}.png", pngData);
+        firebaseManager.UploadToStorage(pngData, name);
     }
 }

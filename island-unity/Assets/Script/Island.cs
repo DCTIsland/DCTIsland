@@ -17,7 +17,8 @@ public class Island : MonoBehaviour
     [SerializeField]
     string id;
     string thread_id;
-    IslandType islandBase;
+    public IslandType islandBase;
+    public Vector2Int worldPos;
     string mascotTexName;
     string mascotTexUrl;
     Obj[] islandObj = new Obj[3];
@@ -33,11 +34,12 @@ public class Island : MonoBehaviour
         InitInsideMap();
     }
 
-    public void SetInfo(IslandSet data, IslandType type)
+    public void SetInfo(IslandType type, Vector2Int pos, IslandSet data)
     {
         id = data.key;
         thread_id = data.value.thread_id;
         islandBase = type;
+        worldPos = pos;
         mascotTexUrl = mascotTexUrl = TexUrl(data.value.thread_id);
     }
 

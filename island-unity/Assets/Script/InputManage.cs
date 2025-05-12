@@ -11,7 +11,7 @@ public class InputManage : MonoBehaviour
     int[] testTypeArr = new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 2};
     int i = 0;
 
-    public void InputTest()
+    public void GenIslandTest()
     {
         int rndID = Random.Range(0, 100);
         string[] emotion = {"Happiness", "Sadness", "Anger", "Fear", "Disgust"};
@@ -31,5 +31,10 @@ public class InputManage : MonoBehaviour
         
         if(i < testTypeArr.Length - 1)
             i++;
+    }
+
+    public void DestroyTest()
+    {
+        islandManage.Quake();
     }
 }
