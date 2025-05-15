@@ -2077,7 +2077,6 @@ Transform:
   - {fileID: 696923601}
   - {fileID: 1291115595}
   - {fileID: 1354554753}
-  - {fileID: 1880636478}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &742947382
@@ -4154,6 +4153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowMove: 0
+  mouseSensitivity: 3
 --- !u!54 &1354554757
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5949,7 +5949,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 738354223}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1940210403255313113, guid: 3e0348a2d6247d74a90a107ee2e14cf9,
         type: 3}
@@ -6050,7 +6050,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1888225495
 Transform:
   m_ObjectHideFlags: 0
@@ -6787,6 +6787,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 692865014}
   - {fileID: 738354223}
+  - {fileID: 1880636477}
   - {fileID: 1888225495}
   - {fileID: 1546110248}
   - {fileID: 1888269368}
