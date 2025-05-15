@@ -8,10 +8,12 @@ using TMPro;
 
 public class InteractPageController : MonoBehaviour
 {
+    [SerializeField] GameObject BG;
     [SerializeField] GameObject MainPage;
     [SerializeField] GameObject InputPage;
     [SerializeField] GameObject ErrorPage;
-    [SerializeField] GameObject BG;
+    [SerializeField] GameObject WalkPage;
+    [SerializeField] GameObject ThanksPage;
 
     [SerializeField] TMP_InputField input;
 
@@ -20,31 +22,46 @@ public class InteractPageController : MonoBehaviour
 
     public void ShowMainPage()
     {
+        CloseAllPage();
+        BG.SetActive(true);
         MainPage.SetActive(true);
-        InputPage.SetActive(false);
-        ErrorPage.SetActive(false);
     }
 
     public void ShowInputPage()
     {
-        MainPage.SetActive(false);
+        CloseAllPage();
+        BG.SetActive(true);
         InputPage.SetActive(true);
-        ErrorPage.SetActive(false);
     }
 
     public void ShowErrorPage()
     {
-        MainPage.SetActive(false);
-        InputPage.SetActive(false);
+        CloseAllPage();
+        BG.SetActive(true);
         ErrorPage.SetActive(true);
+    }
+
+    public void ShowWalkPage()
+    {
+        CloseAllPage();
+        WalkPage.SetActive(true);
+    }
+
+    public void ShowThanksPage()
+    {
+        CloseAllPage();
+        BG.SetActive(true);
+        ThanksPage.SetActive(true);
     }
 
     void CloseAllPage()
     {
+        BG.SetActive(false);
         MainPage.SetActive(false);
         InputPage.SetActive(false);
         ErrorPage.SetActive(false);
-        BG.SetActive(false);
+        WalkPage.SetActive(false);
+        ThanksPage.SetActive(false);
     }
 
     public void Search()
@@ -63,7 +80,7 @@ public class InteractPageController : MonoBehaviour
             if (islandScript.thread_id == text)
             {
                 searchSuccess = 1;
-                CloseAllPage();
+                ShowWalkPage();
                 VCManager.ToFocusCamera(island);
                 break;
             }
@@ -79,16 +96,20 @@ public class InteractPageController : MonoBehaviour
     public void RndToOtherIsland()
     {
         int queneN = islandManage.islandInWorldQueue.Count;
-        if(queneN == 0)
+        GameObject island;
+
+        if (queneN <= 0)
         {
-            return;
+            island = null;
+        }
+        else
+        {
+            int cnt = queneN > 10 ? 10 : queneN;
+            int rnd = Random.Range(0, cnt);
+            island = islandManage.islandInWorldQueue.ElementAt(rnd);
         }
 
-        int cnt = queneN > 10 ? 10 : queneN;
-        int rnd = Random.Range(0, cnt);
-        GameObject island = islandManage.islandInWorldQueue.ElementAt(rnd);
-
-        CloseAllPage();
+        ShowWalkPage();
         VCManager.ToFocusCamera(island);
     }
 }
