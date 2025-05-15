@@ -16,7 +16,7 @@ public class Island : MonoBehaviour
     //island basic info
     [SerializeField]
     string id;
-    string thread_id;
+    public string thread_id;
     public IslandType islandBase;
     public Vector2Int worldPos;
     string mascotTexName;

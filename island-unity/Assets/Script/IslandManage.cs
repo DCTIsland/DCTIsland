@@ -29,7 +29,7 @@ public class IslandManage : MonoBehaviour
     // data about map
     int[][] map = new int[15][];
     Dictionary<IslandType, List<Vector2Int>> islandNext = new Dictionary<IslandType, List<Vector2Int>>();
-    Queue<GameObject> islandInWorldQueue = new Queue<GameObject>();
+    public Queue<GameObject> islandInWorldQueue = new Queue<GameObject>();
 
     // snapshot
     public Snapshot snapshot;
