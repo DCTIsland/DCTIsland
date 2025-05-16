@@ -18,7 +18,11 @@ public class InteractPageController : MonoBehaviour
     [SerializeField] TMP_InputField input;
 
     [SerializeField] VCamManager VCManager;
+    [SerializeField] FocusCamController focusCamController;
     [SerializeField] IslandManage islandManage;
+
+    [SerializeField] GameObject defaultIsland;
+    GameObject island;
 
     public void ShowMainPage()
     {
@@ -96,11 +100,10 @@ public class InteractPageController : MonoBehaviour
     public void RndToOtherIsland()
     {
         int queneN = islandManage.islandInWorldQueue.Count;
-        GameObject island;
 
         if (queneN <= 0)
         {
-            island = null;
+            island = defaultIsland;
         }
         else
         {
@@ -111,5 +114,10 @@ public class InteractPageController : MonoBehaviour
 
         ShowWalkPage();
         VCManager.ToFocusCamera(island);
+    }
+
+    public void ResetPosition()
+    {
+        focusCamController.StartReturnPos(island);
     }
 }

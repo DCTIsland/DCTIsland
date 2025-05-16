@@ -8,8 +8,6 @@ public class VCamManager : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera WholeCamera;
     [SerializeField] CinemachineVirtualCamera FocusCamera;
 
-    [SerializeField] GameObject defaultIsland;
-
     public void ToWholeCamera()
     {
         FocusCamera.GetComponent<FocusCamController>().allowMove = false;
@@ -20,11 +18,6 @@ public class VCamManager : MonoBehaviour
 
     public void ToFocusCamera(GameObject island)
     {
-        if (island == null)
-        {
-            island = defaultIsland;
-        }
-
         Debug.Log($"focus on x: {island.transform.position.x}, y: {island.transform.position.y}, z: {island.transform.position.z}");
 
         FocusCamera.transform.position = island.transform.position + new Vector3(0, 0.8f, 1f);
