@@ -70,8 +70,8 @@ public class FirebaseManager : MonoBehaviour
             return;
         }
 
-        //讀取已存在數據後不理他
-        if(existingDataCount > 0){
+        //讀取已存在數據後不理他，預設留十個
+        if(existingDataCount > 10){
             existingDataCount--;
             return;
         }
