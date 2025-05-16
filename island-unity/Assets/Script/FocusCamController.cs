@@ -68,6 +68,7 @@ public class FocusCamController : MonoBehaviour
         {
             transform.position = targetPos;
             transform.rotation = targetRot;
+            yaw = 180f;
             inReturn = false;
         }
     }

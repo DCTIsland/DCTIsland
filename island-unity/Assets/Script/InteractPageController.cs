@@ -84,6 +84,7 @@ public class InteractPageController : MonoBehaviour
             if (islandScript.thread_id == text)
             {
                 searchSuccess = 1;
+                this.island = island;
                 ShowWalkPage();
                 VCManager.ToFocusCamera(island);
                 break;
