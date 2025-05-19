@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緒島</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- <link rel="stylesheet" href='static/styles.css'> -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet"> -->
+</head>
+<body>
+    <!-- 上方綠色區塊 -->
+    <div class="header"></div>
+    
+    <!-- 主要內容容器 -->
+    <div class="container">
+
+        <h1>STEP 1</h1>
+        <p>輸入您的Threads帳號。</p>
+
+        <div class="form-container">
+            <form class="form" id="threadsForm" action="/loading" method="POST">
+                <div class="input-container">
+                    <label for="thread_id">＠</label>
+                    <input type="text" id="thread_id" name="thread_id" placeholder="" required>
+                </div>
+                <button type="submit" class="submit-btn">生成我的島嶼</button>
+            </form>
+        <a href="/custom_input" class="no-threads-account" style="-webkit-tap-highlight-color: transparent;">我沒有Threads帳號&gt;</a>
+        </div>
+    </div>
+
+    <div class="footer"></div> <!-- 單條綠色區塊 -->
+        <div class="footer-character">
+                <img src="static/Threadman.png" alt="Threadman">
+        </div>        
+    </div>
+
+    <script>
+        // 控制按鈕啟用與否
+        const input = document.getElementById('thread_id');
+        const button = document.querySelector('.submit-btn');
+
+        input.addEventListener('input', () => {
+            if (input.value.trim()) {
+                button.disabled = false;
+                button.classList.add('active');
+            } else {
+                button.disabled = true;
+                button.classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        function isSafari() {
+            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        }
+    
+        function isLineBrowser() {
+            return /Line/i.test(navigator.userAgent);
+        }
+    
+        function adjustCharacter() {
+            const footerCharacter = document.querySelector('.footer-character');
+            if (!footerCharacter) return;
+    
+            const footerHeight = document.querySelector('.footer')?.offsetHeight || 50;
+    
+            if (isLineBrowser()) {
+                // 如果是 LINE 瀏覽器，隱藏 footer-character
+                footerCharacter.style.display = 'none';
+            } else {
+                // Safari 顯示，並且推高
+                footerCharacter.style.display = 'block';
+                if (isSafari()) {
+                    footerCharacter.style.bottom = `${footerHeight + 10}px`;
+                } else {
+                    footerCharacter.style.bottom = `${footerHeight}px`;
+                }
+            }
+        }
+    
+        window.addEventListener('load', adjustCharacter);
+        window.addEventListener('resize', adjustCharacter);
+    </script>    
+</body>
+</html>

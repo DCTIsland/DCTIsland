@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緒島</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- 上方綠色區塊 -->
+    <div class="header"></div>
+    
+    <!-- 主要內容容器 -->
+    <div class="container">
+
+        <h1>STEP 1</h1>
+        <p>輸入您的自訂ID跟今天的想法吧。</p>
+
+        <div class="form-cosntainer">
+            <form class="form" id="customForm" action="/custom_submit" method="POST">
+                <div class="input-container">
+                    <label for="user_id">＠</label>
+                    <input type="text" id="user_id" name="user_id" placeholder="" maxlength="20" pattern="[a-zA-Z0-9]{1,20}" required>
+                </div>
+                <div class="text-container">
+                    <textarea class="user_thought" id="user_thought" name="user_thought" placeholder="請輸入500字以內的內容" maxlength="500" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn1">生成我的島嶼</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer"></div> <!-- 單條綠色區塊 -->
+        <div class="footer-character">
+                <img src="static/Threadman.png" alt="Threadman">
+            </div>
+        </div>        
+    </div>
+
+    <script>
+        // 控制按鈕啟用與否
+        const userIdInput = document.getElementById('user_id');
+        const thoughtInput = document.getElementById('user_thought');
+        const submitButton = document.querySelector('.submit-btn1');
+
+        function validateForm() {
+            if (userIdInput.value.trim() && thoughtInput.value.trim()) {
+                submitButton.disabled = false;
+                submitButton.classList.add('active');
+            } else {
+                submitButton.disabled = true;
+                submitButton.classList.remove('active');
+            }
+        }
+
+        userIdInput.addEventListener('input', validateForm);
+        thoughtInput.addEventListener('input', validateForm);
+
+        // 判斷是否為 Safari 或 LINE 瀏覽器
+        const ua = navigator.userAgent;
+        const isSafari = ua.includes("Safari") && !ua.includes("Chrome");
+        const isLine = ua.includes("Line");
+
+        if (isSafari || isLine) {
+            document.querySelector('.footer-character').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

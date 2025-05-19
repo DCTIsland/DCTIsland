@@ -1,25 +1,282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading Game</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
-  <script src="/static/sketch.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>緒島</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        #hint-box {
+            position: fixed;
+            top: 78%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #FDF6EC;
+            color: #7db996;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 999;
+            width: 70%;
+            max-width: 250px;
+            border: 3px solid #E19D2D;
+            font-family: "Microsoft JhengHei", sans-serif;
+            line-height: 1.8;
+        }
+        .a-canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
 </head>
 <body>
-  <main class="container" action="/loading" method="POST">
-    <script src="sketch.js"></script>
-  </main>
-  <script>
-    // 自動跳轉到 /process
-    document.addEventListener('DOMContentLoaded', () => {
-        const threadId = "{{ thread_id }}"; // 從後端傳入的 thread_id
-        setTimeout(() => {
-            window.location.href = `/process?thread_id=${encodeURIComponent(threadId)}`;
-        }, 3000); // 等待 3 秒
-    });
-  </script>
+    <div id="hint-box">掃描看看桌上的圖案吧<br>可以旋轉放大模型喔</div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+        <!-- 第一個標記 -->
+        <a-marker type="pattern" url="./static/pattern-1.patt">
+            <a-entity 
+                gltf-model="https://dctdb.github.io/dctdb/concrete_default.glb"
+                scale="2 2 2"  
+                position="0 0 0"
+                rotation="0 180 0"
+                gesture-handler>
+            </a-entity>
+        </a-marker>
+
+        <!-- 第二個標記 -->
+        <a-marker type="pattern" url="./static/pattern-2.patt">
+            <a-entity 
+                gltf-model="https://dctdb.github.io/dctdb/grass_default.glb"
+                scale="2 2 2"  
+                position="0 0 0"
+                rotation="0 180 0"
+                gesture-handler>
+            </a-entity>
+        </a-marker>
+
+        <!-- 第三個標記 -->
+        <a-marker type="pattern" url="./static/pattern-3.patt">
+            <a-entity 
+                gltf-model="https://dctdb.github.io/dctdb/ice_default.glb"
+                scale="2 2 2"  
+                position="0 0 0"
+                rotation="0 180 0"
+                gesture-handler>
+            </a-entity>
+        </a-marker>
+
+        <!-- 第四個標記 -->
+        <a-marker type="pattern" url="./static/pattern-4.patt">
+            <a-entity 
+                gltf-model="https://dctdb.github.io/dctdb/lava_default.glb"
+                scale="2 2 2"  
+                position="0 0 0"
+                rotation="0 180 0"
+                gesture-handler>
+            </a-entity>
+        </a-marker>
+
+        <!-- 第五個標記 -->
+        <a-marker type="pattern" url="./static/pattern-5.patt">
+            <a-entity 
+                gltf-model="https://dctdb.github.io/dctdb/desert_default.glb"
+                scale="2 2 2"  
+                position="0 0 0"
+                rotation="0 180 0"
+                gesture-handler>
+            </a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        // document.body.addEventListener('click', function () {
+        //     document.getElementById('hint-box').style.display = 'none';
+        // });
+        AFRAME.registerComponent('gesture-handler', {
+            init: function () {
+                this.previousX = null;  
+                this.previousY = null;  
+                this.previousDistance = null;
+                this.el.sceneEl.addEventListener('touchmove', this.onTouchMove.bind(this));
+                this.el.sceneEl.addEventListener('touchstart', this.onTouchStart.bind(this));
+                this.el.sceneEl.addEventListener('touchend', this.onTouchEnd.bind(this));
+                this.el.sceneEl.addEventListener('mousemove', this.onMouseMove.bind(this));
+                this.el.sceneEl.addEventListener('mousedown', this.onMouseDown.bind(this));
+                this.el.sceneEl.addEventListener('mouseup', this.onMouseUp.bind(this));
+                this.el.sceneEl.addEventListener('wheel', this.onMouseWheel.bind(this));
+            },
+            
+            onTouchStart: function (event) {
+                if (event.touches.length === 1) {
+                    this.previousX = event.touches[0].clientX;
+                    this.previousY = event.touches[0].clientY;
+                } else if (event.touches.length === 2) {
+                    this.previousDistance = this.getDistance(event.touches);
+                }
+            },
+
+            onTouchMove: function (event) {
+                if (event.touches.length === 1) {  
+                    this.handleRotation(event.touches[0].clientX, event.touches[0].clientY);
+                } else if (event.touches.length === 2) {  
+                    let currentDistance = this.getDistance(event.touches);
+                    this.handleScaling(currentDistance);
+                }
+            },
+
+            onTouchEnd: function () {
+                this.previousX = null;
+                this.previousY = null;
+                this.previousDistance = null;
+            },
+
+            onMouseDown: function (event) {
+                if (event.buttons === 1) {  
+                    this.previousX = event.clientX;
+                    this.previousY = event.clientY;
+                }
+            },
+
+            onMouseMove: function (event) {
+                if (event.buttons === 1) { 
+                    this.handleRotation(event.clientX, event.clientY);
+                }
+            },
+
+            onMouseUp: function () {
+                this.previousX = null;
+                this.previousY = null;
+            },
+
+            onMouseWheel: function (event) {
+                let model = this.el;
+                let scale = model.getAttribute('scale');
+                let factor = event.deltaY > 0 ? 0.9 : 1.1; 
+                let newScale = {
+                    x: Math.max(0.5, Math.min(5, scale.x * factor)),
+                    y: Math.max(0.5, Math.min(5, scale.y * factor)),
+                    z: Math.max(0.5, Math.min(5, scale.z * factor))
+                };
+                model.setAttribute('scale', newScale);
+            },
+
+            handleRotation: function (currentX, currentY) {
+                let model = this.el;
+                if (this.previousX !== null && this.previousY !== null) {
+                    let deltaX = currentX - this.previousX;
+                    let deltaY = currentY - this.previousY;
+                    let rotation = model.getAttribute('rotation');
+                    
+                    rotation.y += deltaX * 0.05; 
+                    rotation.x -= deltaY * 0.07;  
+                    rotation.x = Math.max(-45, Math.min(45, rotation.x));
+
+                    model.setAttribute('rotation', rotation);
+                }
+                this.previousX = currentX;
+                this.previousY = currentY;
+            },
+
+            getDistance: function (touches) {
+                let dx = touches[0].clientX - touches[1].clientX;
+                let dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            },
+
+            handleScaling: function (currentDistance) {
+                let model = this.el;
+                if (this.previousDistance !== null) {
+                    let scale = model.getAttribute('scale');
+                    let factor = currentDistance / this.previousDistance;
+                    let newScale = {
+                        x: Math.max(1, Math.min(4, scale.x * factor)),
+                        y: Math.max(1, Math.min(4, scale.y * factor)),
+                        z: Math.max(1, Math.min(4, scale.z * factor))
+                    };
+                    model.setAttribute('scale', newScale);
+                }
+                this.previousDistance = currentDistance;
+            }
+        });
+    </script>
+</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const threadId = "{{ thread_id|safe }}";
+            const userId = "{{ user_id|safe }}";
+
+            if (userId) {
+                // 自創模式，跳轉到 process_custom
+                setTimeout(() => {
+                    window.location.href = `/process_custom?user_id=${encodeURIComponent(userId)}&user_thought=${encodeURIComponent(userId)}`;
+                }, 20000);
+            } else {
+                // 正常模式，跳轉到 process
+                setTimeout(() => {
+                    window.location.href = `/process?thread_id=${encodeURIComponent(threadId)}`;
+                }, 20000);
+            }
+        });
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+    
+        // Firebase 設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1mSH0fT_kw2UeOpcLTpp1MQE-4nI71yU",
+            authDomain: "dctdb-8c8ad.firebaseapp.com",
+            databaseURL: "https://dctdb-8c8ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "dctdb-8c8ad",
+            storageBucket: "dctdb-8c8ad.firebasestorage.app",
+            messagingSenderId: "510348230149",
+            appId: "1:510348230149:web:91dbab4704581f8e84666c",
+            measurementId: "G-Z0KTNE579F"
+        };
+    
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+    
+        document.addEventListener('DOMContentLoaded', async () => {
+            const threadId = "{{ thread_id }}"; // 從後端獲取 thread_id
+            const filePath = `snapshots/${threadId}.png`;
+            const fileRef = ref(storage, filePath);
+    
+            // 檢查檔案是否存在
+            const checkFile = async () => {
+                try {
+                    await getDownloadURL(fileRef);
+                    console.log("檔案已找到，等待 1 秒跳轉...");
+                    setTimeout(() => {
+                        window.location.href = `/result?thread_id=${encodeURIComponent(threadId)}`;
+                    }, 5000); // **等待 1 秒後跳轉**
+                } catch (error) {
+                    if (error.code === 'storage/object-not-found') {
+                        setTimeout(checkFile, 3000); // 若檔案不存在，每 3 秒檢查一次
+                    } else {
+                        console.error("Firebase Storage 錯誤:", error);
+                    }
+                }
+            };
+    
+            checkFile(); // 啟動檢查
+        });
+    </script>
 </body>
 </html>

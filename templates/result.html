@@ -2,39 +2,529 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='result.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet">
-    <title>Result</title>
+    <link rel="stylesheet" href='static/result.css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>緒島</title>
+    <!-- 添加 SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+    <!-- 上方綠色區塊 -->
+    <div class="header"></div>
+    <!-- 主要內容容器 -->
     <div class="container">
-        <!-- Top section with the image and ID -->
-        <div class="results">
-            <img src="static/lava.png" alt="Analysis Visual" class="analysis-image">
-            <h1 class="user-id">@{{ thread_id }}</h1>
-        </div>
-
-        <!-- Analysis results section -->
-        <div class="results">
-            <div class="result-item">
-                <h2>Topics</h2>
-                <ul>
-                    <li>{{ topics[0] }}</li>
-                    <li>{{ topics[1] }}</li>
-                    <li>{{ topics[2] }}</li>
-                </ul>
+        <div id="screenshot-area">
+            <h2>這是 <span class="user-id">＠{{ thread_id }}</span> 的島嶼</h2>
+            <div class="island-section">
+                <button class="nav-button">❮</button>
+                <div class="image-wrapper">
+                    <img class="island-image" crossorigin="anonymous" alt="Island View" style="display:none;">
+                    <img class="loading-gif" src="static/building.gif" alt="Loading...">
+                </div>
+                <button class="nav-button">❯</button>
             </div>
-            <div class="result-item">
-                <h2>Emotion</h2>
-                <p>{{ emotion }}</p>           
+            <!-- 情緒和主題區域 -->
+            <div class="info-section">
+                <div class="emotion">
+                    <p class="hex-text hex-text-emo"><img src="static/Polygon.png" class="hex-icon">情緒生態系<img src="static/Polygon.png" class="hex-icon"></p>
+                    <div class="emotion-box">{{ emotion }}</div>
+                </div>
+                <div class="topics">
+                    <p class="hex-text"><img src="static/Polygon.png" class="hex-icon">島嶼關鍵字<img src="static/Polygon.png" class="hex-icon"></p>
+                    <ul>
+                        <li>＃{{ topics[0] }}</li>
+                        <li>＃{{ topics[1] }}</li>
+                        <li>＃{{ topics[2] }}</li>
+                    </ul>
+                </div>
+                <!-- 底部按鈕上方歡迎圖 -->
+                <img src="{{ url_for('static', filename='welcome.png') }}" class="welcome-banner">
             </div>
         </div>
-
-        <!-- Back to index button -->
-        <div class="footer">
-            <a href="/" class="index-button">Back to Main</a>
+        <div class="button-group">
+            <button class="download-button">下載為 PNG</button>
+            <button class="home-button" onclick="window.location.href='/'">回到主頁</button>
+        </div>
+        <!-- 回饋區域 -->
+        <div class="feedback-section">
+            <div class="hex-text"><img src="static/Polygon.png" class="hex-icon">匿名回饋區<img src="static/Polygon.png" class="hex-icon"></div>
+            <div class="feedback-line"></div>
+            <div class="rating-container">
+                <span class="rating-label">評分：</span>
+                <div class="star-rating">
+                    <span class="star" data-rating="1">
+                        <svg viewBox="0 0 100 100" class="hexagon">
+                            <polygon points="10,50 30,15 70,15 90,50 70,85 30,85" />
+                        </svg>
+                    </span>
+                    <span class="star" data-rating="2">
+                        <svg viewBox="0 0 100 100" class="hexagon">
+                            <polygon points="10,50 30,15 70,15 90,50 70,85 30,85" />
+                        </svg>
+                    </span>
+                    <span class="star" data-rating="3">
+                        <svg viewBox="0 0 100 100" class="hexagon">
+                            <polygon points="10,50 30,15 70,15 90,50 70,85 30,85" />
+                        </svg>
+                    </span>
+                    <span class="star" data-rating="4">
+                        <svg viewBox="0 0 100 100" class="hexagon">
+                            <polygon points="10,50 30,15 70,15 90,50 70,85 30,85" />
+                        </svg>
+                    </span>
+                    <span class="star" data-rating="5">
+                        <svg viewBox="0 0 100 100" class="hexagon">
+                            <polygon points="10,50 30,15 70,15 90,50 70,85 30,85" />
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <textarea class="feedback-input" placeholder="幫我們留下一些回饋吧"></textarea>
+            <button class="submit-feedback" style="-webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">繳交回饋</button>
         </div>
     </div>
+    <div class="footer"></div> <!-- 單條綠色區塊 -->  
 </body>
+<script>
+    const rawSnapshotUrl = "{{ snapshot_url|safe }}";
+    const rawImgUrl = "{{ img_url|safe }}";
+
+    // 包成proxy URL
+    const proxySnapshotUrl = `/proxy-image?url=${encodeURIComponent(rawSnapshotUrl)}`;
+    const proxyImgUrl = `/proxy-image?url=${encodeURIComponent(rawImgUrl)}`;
+
+    // 組成圖片陣列
+    const images = rawSnapshotUrl ? [proxySnapshotUrl, proxyImgUrl] : [proxyImgUrl];
+
+    // const images = [
+    //     'static/kitto.tw.png',
+    //     'static/textures_kitto.tw.png',
+    // ];
+
+    // 元素
+    const islandImage = document.querySelector('.island-image');
+    const topicItems = document.querySelectorAll('.topics li');
+    const prevButton = document.querySelector('.nav-button:first-of-type');
+    const nextButton = document.querySelector('.nav-button:last-of-type');
+    const emotionBox = document.querySelector('.emotion-box');
+
+    // 狀態控制
+    let currentIndex = 0;
+    let toggleState = true;  // true = emotion-box亮, false = topics li[0]亮
+    let hasLoadedOnce = false;
+
+    function showImageWithAnimation(imgElement, src, delay = 300) {
+        imgElement.classList.remove('loaded');
+        void imgElement.offsetWidth;
+        imgElement.src = src;
+        imgElement.style.display = '';
+        setTimeout(() => {
+            imgElement.classList.add('loaded');
+        }, delay);
+    }
+
+    // 圖片載入+動畫
+    function loadImageWithAnimation(src) {
+        const islandImage = document.querySelector('.island-image');
+        const loadingGif = document.querySelector('.loading-gif');
+
+        if (!hasLoadedOnce) {
+            loadingGif.style.display = '';
+            islandImage.style.display = 'none';
+            islandImage.classList.remove('loaded');
+            const startTime = Date.now();
+
+            const realImg = new Image();
+            realImg.crossOrigin = 'anonymous';
+            realImg.src = src;
+            realImg.onload = () => {
+                const elapsed = Date.now() - startTime;
+                const delay = Math.max(0, 5000 - elapsed);
+                setTimeout(() => {
+                    loadingGif.style.display = 'none';
+                    showImageWithAnimation(islandImage, src);
+                    hasLoadedOnce = true;
+                }, delay);
+            };
+        } else {
+            islandImage.style.display = 'none';
+            setTimeout(() => {
+                showImageWithAnimation(islandImage, src);
+            }, 200);
+        }
+    }
+
+    // 初始化
+    function init() {
+        loadImageWithAnimation(images[currentIndex]);
+        emotionBox.classList.add('active');
+        topicItems.forEach(li => li.classList.remove('active'));
+    }
+
+    // 切換圖片
+    function updateImage(index) {
+        const islandImage = document.querySelector('.island-image');
+        const emotionBox = document.querySelector('.emotion-box');
+        const topicItems = document.querySelectorAll('.topics li');
+
+        // 移除所有動畫類
+        islandImage.classList.remove('loaded');
+        emotionBox.classList.remove('active');
+        topicItems.forEach(li => li.classList.remove('active'));
+
+        // 等待一小段時間確保動畫重置
+        setTimeout(() => {
+            // 設置新的圖片並觸發動畫
+            loadImageWithAnimation(images[index]);
+
+            // 更新狀態
+            if (toggleState) {
+                topicItems[0].classList.add('active');
+            } else {
+                emotionBox.classList.add('active');
+            }
+            toggleState = !toggleState;
+        }, 200);
+    }
+
+    // 按鈕事件
+    prevButton.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        updateImage(currentIndex);
+    });
+
+    nextButton.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateImage(currentIndex);
+    });
+
+    init();
+</script>
+<script>
+    // 引入 html2canvas（如果沒下載，可以使用這個 CDN）
+    const loadScript = (src, callback) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = callback;
+        document.head.appendChild(script);
+    };
+
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => {
+        console.log("html2canvas 已載入");
+
+        const downloadButton = document.querySelector('.download-button');
+        const screenshotArea = document.querySelector('#screenshot-area');
+        const header = document.querySelector('.header');
+        const footer = document.querySelector('.footer');
+
+        downloadButton.addEventListener('click', () => {
+            // 確保頁面滾到最上方，避免截圖歪掉
+            window.scrollTo(0, 0);
+
+            // 創建一個臨時容器來放置所有要截圖的元素
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '-9999px';
+            document.body.appendChild(tempContainer);
+
+            // 複製 header
+            const headerClone = header.cloneNode(true);
+            headerClone.style.position = 'relative';
+            headerClone.style.top = '0';
+            tempContainer.appendChild(headerClone);
+
+            // 複製主要內容
+            const contentClone = screenshotArea.cloneNode(true);
+            contentClone.style.position = 'relative';
+            // 在截圖時減少 h2 的上方間距
+            const h2Clone = contentClone.querySelector('h2');
+            if (h2Clone) {
+                h2Clone.style.marginTop = '10px';
+            }
+            // 在截圖時減少 welcome banner 的下方間距
+            const welcomeBannerClone = contentClone.querySelector('.welcome-banner');
+            if (welcomeBannerClone) {
+                welcomeBannerClone.style.marginBottom = '10px';
+            }
+            tempContainer.appendChild(contentClone);
+
+            // 複製 footer
+            const footerClone = footer.cloneNode(true);
+            footerClone.style.position = 'relative';
+            tempContainer.appendChild(footerClone);
+
+            // 截圖整個臨時容器
+            html2canvas(tempContainer, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#FDF6EC'
+            }).then(canvas => {
+                // 移除臨時容器
+                document.body.removeChild(tempContainer);
+
+                // 下載圖片
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'island-screenshot.png';
+                link.click();
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const threadIdElement = document.querySelector(".user-id");
+        const threadId = threadIdElement.textContent.replace("＠", ""); // 去掉 @ 符號
+        const h2Element = document.querySelector("h2");
+
+        // 根據 thread_id 長度調整字體大小
+        let fontSize;
+        if (threadId.length <= 20) {
+            fontSize = "5vw"; // 字數少，字體較大
+        } else {
+            fontSize = "4vw"; // 字數多，字體較小
+        }
+
+        h2Element.style.fontSize = fontSize;
+
+        // 根據 topic 長度調整字體大小
+        const topicItems = document.querySelectorAll(".topics li");
+
+        topicItems.forEach(item => {
+            if (item.textContent.length > 21) {
+                item.style.fontSize = "3vw"; // 長度超過 21 字時縮小字體
+            } else {
+                item.style.fontSize = "4vw"; // 預設字體大小
+            }
+        });
+
+        // 處理回饋提交
+        const feedbackInput = document.querySelector('.feedback-input');
+        const submitFeedbackBtn = document.querySelector('.submit-feedback');
+        const stars = document.querySelectorAll('.star');
+        const starContainer = document.querySelector('.star-rating');
+        let isDragging = false;
+        let selectedRating = 5; // 預設五顆星
+        let begPopupShown = false;
+
+        // 初始化星星
+        updateStars(selectedRating);
+
+        // 滑鼠事件處理
+        starContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const star = e.target.closest('.star');
+            if (star) {
+                const index = Array.from(stars).indexOf(star);
+                selectedRating = index + 1;
+                updateStars(selectedRating);
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const star = e.target.closest('.star');
+            if (star) {
+                const index = Array.from(stars).indexOf(star);
+                selectedRating = index + 1;
+                updateStars(selectedRating);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // 觸控事件處理
+        starContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const star = e.target.closest('.star');
+            if (star) {
+                const index = Array.from(stars).indexOf(star);
+                selectedRating = index + 1;
+                updateStars(selectedRating);
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            const star = element?.closest('.star');
+            
+            if (star) {
+                const index = Array.from(stars).indexOf(star);
+                selectedRating = index + 1;
+                updateStars(selectedRating);
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // 點擊事件處理
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                selectedRating = index + 1;
+                updateStars(selectedRating);
+            });
+        });
+
+        function updateStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+
+            // 彩蛋：只顯示一次
+            if (rating <= 3 && !begPopupShown) {
+                begPopupShown = true;
+                Swal.fire({
+                    title: '您真的忍心嗎！？',
+                    text: '我們會努力做得更好的！',
+                    imageUrl: '/static/error.gif',
+                    imageWidth: 120,
+                    imageHeight: 120,
+                    showCancelButton: true,
+                    confirmButtonText: '大發慈悲',
+                    cancelButtonText: '狠心評分',
+                    confirmButtonColor: '#F2B137',
+                    cancelButtonColor: '#b0a89c',
+                    background: '#FDF6EC',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        selectedRating = 5;
+                        updateStars(5);
+                    }
+                    // 若點擊狠心評分，什麼都不做
+                });
+            }
+        }
+        
+        submitFeedbackBtn.addEventListener('click', async () => {
+            const feedback = feedbackInput.value.trim();
+            if (!feedback) {
+                Swal.fire({
+                    title: '提醒',
+                    text: '請輸入回饋內容',
+                    icon: 'info',
+                    confirmButtonText: '好的',
+                    confirmButtonColor: '#7FB069',
+                    background: '#FDF6EC',
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                return;
+            }
+
+            if (selectedRating === 0) {
+                Swal.fire({
+                    title: '提醒',
+                    text: '請選擇評分',
+                    icon: 'info',
+                    confirmButtonText: '好的',
+                    confirmButtonColor: '#7FB069',
+                    background: '#FDF6EC',
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit_feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'thread_id': threadId,
+                        'feedback': feedback,
+                        'rating': selectedRating
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    Swal.fire({
+                        title: '感謝您的回饋！',
+                        text: '您的意見對我們很重要',
+                        icon: 'success',
+                        confirmButtonText: '好的',
+                        confirmButtonColor: '#7FB069',
+                        background: '#FDF6EC',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                    feedbackInput.value = ''; // 清空輸入框
+                    selectedRating = 0; // 重置評分
+                    updateStars(0); // 重置星星
+                } else {
+                    Swal.fire({
+                        title: '提交失敗',
+                        text: '請稍後再試',
+                        icon: 'error',
+                        confirmButtonText: '好的',
+                        confirmButtonColor: '#7FB069',
+                        background: '#FDF6EC',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                Swal.fire({
+                    title: '發生錯誤',
+                    text: '請稍後再試',
+                    icon: 'error',
+                    confirmButtonText: '好的',
+                    confirmButtonColor: '#7FB069',
+                    background: '#FDF6EC',
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+        });
+    });
+</script>
 </html>

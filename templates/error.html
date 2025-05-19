@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='error.css') }}">
+    <link rel="stylesheet" href='static/error.css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>緒島</title>
+</head>
+<body>
+    <div class="header"></div>
+    
+    <div class="container">
+        <h1>哎呀！出了點小狀況...</h1>
+        <p>您的島嶼建造時遇到了一些問題。<br>
+            登島前，請先確認您的帳號設定為「<strong>公開</strong>」，
+            並且「<strong>已有發布貼文</strong>」再試一次吧！
+        </p>
+        <button class="back-btn" onclick="window.location.href='/input';">我要重新登島！</button>
+        <a href="/custom_input" class="no-threads-account" style="-webkit-tap-highlight-color: transparent;">試試別的方式登島&gt;</a>
+
+    <div class="footer"></div> <!-- 單條綠色區塊 -->
+        <div class="footer-character">
+            <img src="static/error.gif" alt="錯誤角色">
+        </div>
+    </div>
+    <script>
+        // Check for Safari
+        const isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+
+        if (isSafari) {
+            document.querySelector('h1').style.fontSize = '25px';
+            document.querySelector('p').style.fontSize = '16px';
+        }
+
+        // Check for Line Browser (This is a simplified check and might need refinement)
+        const isLine = /Line\//i.test(navigator.userAgent);
+
+        if (isLine) {
+            document.querySelector('.footer-character img').style.bottom = '25px';
+        }
+    </script>
+</body>

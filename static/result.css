@@ -1,99 +1,485 @@
-/* Resetting margins and paddings */
+/* 基本設定 */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    font-family: 'Nova Mono', monospace;
 }
 
-body {
-    font-family: 'Nova Mono', monospace;
-    background-color: #2c2c2c;
-    color: #ffffff;
+/* 綠色標題區塊 */
+.header {
+    width: 100%;
+    height: 60px;
+    background-color: #7db996;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* 確保header在最上層 */
+}
+
+/* 限制整個頁面的大小 */
+body, html {
+    width: 100vw;
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background-color: #FDF6EC;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Changed back to space-between */
+    align-items: center;
+    overflow-y: auto;
+}
+
+/* 綠色標題區塊 */
+.header {
+    width: 100%;
+    height: 60px;
+    background-color: #7db996;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* 標題區塊 */
+h2 {
+    text-align: center; /* 文字置中 */
+    width: 100%;
+    margin-top: 70px; /* 減少與上方距離 */
+    font-weight: bold; /* 加粗 */
+    color: #5C5C5C;
+    font-size: 20px; /* 調整字體大小 */
+}
+
+/* @ 使用者名稱 */
+.user-id {
+    color: #7db996;
+    font-weight: bold;
+}
+
+/* 島嶼圖片區域 */
+.island-section {
+    position: relative;
+    margin: 10px 0;
+    display: flex;
+    justify-content: center; /* 讓圖片完全置中 */
+}
+
+.image-wrapper {
+    width: 80%;
+    max-width: 300px;
+    aspect-ratio: 1/1;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 10px;
 }
 
-.container {
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    background-color: #333;
-    border-radius: 8px;
-}
-
-.header {
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.analysis-image {
-    width: 100%;
-    height: auto;
-    margin-bottom: 10px;
-    position: relative;
-}
-
-.user-id {
+.island-image, .loading-gif {
     position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.5rem;
-    color: #ffffff;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    left: 0;
+    top: 0;
 }
 
-.results {
+.island-image {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.island-image.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 切換按鈕 */
+.nav-button {
+    background: none;
+    border: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 24px;
+    color: #5C5C5C;
+}
+
+.nav-button:first-of-type {
+    left: -10px;
+}
+
+.nav-button:last-of-type {
+    right: -10px;
+}
+
+/* 情緒與關鍵字區域 */
+.info-section {
     display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-    padding: 0 10px;
-}
-
-.result-item {
-    width: 45%;
-    text-align: left;
-}
-
-.result-item h2 {
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 10px;
+    background-color: #FDF6EC;
 }
 
-.result-item ul {
-    margin-top: 10px;
-    list-style: none;
-    padding: 0;
+.emotion, .topics {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold; /* 字體加粗 */
 }
 
-ul {
+.emotion p, .topics p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #5C5C5C;
+    padding: 10px 0; /* 增加上下內距 */
+}
+
+/* 情緒框 */
+.emotion-box {
+    width: 300px;
+    background-color: #FDF6EC;
+    border: 2px solid #7db996;
+    color: #7db996;
+    padding: 10px 0; /* 增加上下內距 */
+    border-radius: 7px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.emotion-box.active {
+    background-color: #7db996;
+    color: #FDF6EC;
+}
+
+/* 關鍵字列表 */
+.topics ul {
     list-style: none;
     padding: 0;
+    width: 100%; /* 讓列表區塊跟圖片一樣寬 */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 讓列表置中 */
+}
+
+.topics li {
+    width: 300px; /* 設定跟 .island-image 一樣的寬度 */
+    max-width: 300px;
+    border: 2px solid #7db996;
+    color: #7db996;
+    padding: 10px 0;
+    border-radius: 7px;
+    margin: 5px 0;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+/* 被選中的關鍵字框 */
+.topics li.active {
+    background-color: #7db996;
+    color: white;
+}
+
+/* 六角形標題 */
+.hex-text {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #5C5C5C;
+    justify-content: center;
+    gap: 8px;
+}
+
+.hex-icon {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    vertical-align: middle;
+    transform: rotate(0deg);
+}
+
+.hex-text-emo {
+    background: #FDF6EC;
+    padding: 4px 12px;
+    position: relative;
+    z-index: 10;
 }
 
 .footer {
-    text-align: center;
-    margin-top: 40px; /* 將原來的 20px 增加到 40px */
+    width: 100%;
+    height: 60px; /* 增加一點高度，讓它更明顯 */
+    background-color: #7db996;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.index-button {
-    font-family: 'Nova Mono', monospace;
-    background-color: #e63946;
-    color: #ffffff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+/* 按鈕樣式 */
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
     margin-top: 10px;
+    width: 100%;
+    position: relative; /* Changed from fixed to relative */
+    margin-bottom: 70px; /* Add margin to account for footer */
 }
 
-.index-button:hover {
-    background-color: #d62839;
+.download-button, .home-button {
+    background-color: #F2B137;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 150px;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
+.download-button:hover {
+    background-color: #E19D2D;
+}
+
+.home-button {
+    background-color: #7db996;
+}
+
+.home-button:hover {
+    background-color: #6ca885;
+}
+
+.home-button:focus, .home-button:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.welcome-banner {
+    width: 95vw;
+    max-width: 380px;
+    display: block;
+    margin: 6px auto 0 auto;
+    margin-bottom: 15px; /* Reduced margin since buttons are now relative */
+}
+
+#screenshot-area {
+    padding-top: 1px;
+    width: 100%;
+}
+
+/* 星星評分系統 */
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.rating-label {
+    color: #5C5C5C;
+    font-weight: bold;
+    font-size: 16px;
+    position: relative;
+    top: -3px;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 5px;
+    padding: 5px;
+    user-select: none;
+}
+
+.star {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    width: 33px;
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hexagon {
+    width: 100%;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+.hexagon polygon {
+    fill: #e8e0d4;
+    stroke: #d4c9b9;
+    stroke-width: 5;
+    transition: all 0.2s ease;
+}
+
+.star:focus {
+    outline: none;
+}
+
+.star:hover .hexagon polygon {
+    fill: #F2B137;
+    stroke: #E19D2D;
+}
+
+.star.active .hexagon polygon {
+    fill: #F2B137;
+    stroke: #E19D2D;
+}
+
+/* 回饋區域 */
+.feedback-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -30px;
+    margin-bottom: 80px;
+}
+
+.feedback-line {
+    width: 300px;
+    height: 2px;
+    background-color: #F2B137;
+    margin: 10px 0 10px 0;
+}
+
+.feedback-input {
+    width: 300px;
+    color: #6d6d6daf;
+    font-weight: bold; /* 加粗 */
+    height: 100px;
+    padding: 10px;
+    border: 2px solid #6d6d6daf;
+    border-radius: 7px;
+    font-size: 16px;
+    font-family: 'Nova Mono', monospace;
+    resize: none;
+    margin-bottom: 10px;
+    background-color: #FDF6EC;
+    transition: border-color 0.3s ease;
+}
+
+.feedback-input:focus {
+    outline: none;
+    border-color: #F2B137;
+}
+
+.feedback-input::placeholder {
+    color: #b0a89c;
+    opacity: 0.7;
+}
+
+.submit-feedback {
+    background-color: #F2B137;
+    color: #FDF6EC;
+    padding: 10px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 150px;
+    text-align: center;
+    margin-top: 15px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.submit-feedback:hover {
+    background-color: #E19D2D;
+}
+
+.submit-feedback:focus, .submit-feedback:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+/* SweetAlert2 自定義樣式 */
+.swal2-popup {
+    font-family: "Microsoft JhengHei", sans-serif;
+    border-radius: 30px;
+    background-color: #FDF6EC;
+    border: 4px solid #E19D2D;
+    margin: 15px;
+    padding: 15px;
+    width: 85% !important;
+    max-width: 350px !important;
+}
+
+.swal2-title {
+    color: #4A4A4A;
+    font-size: 1.3em;
+    margin-bottom: 5px;
+}
+
+.swal2-html-container {
+    color: #666666;
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+.swal2-actions {
+    margin-bottom: 18px !important;
+}
+
+.swal2-confirm {
+    border: none !important;
+    background-color: #F2B137 !important;
+}
+
+.swal2-confirm, .swal2-cancel {
+    min-width: 120px;
+    border-radius: 25px !important;
+    font-size: 1em !important;
+    padding: 10px 30px !important;
+    margin: 0 8px !important;
+}
+
+.swal2-confirm:hover {
+    background-color: #E19D2D !important;
+}
+
+/* 成功圖標顏色 */
+.swal2-icon.swal2-success {
+    border-color: #7db996 !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+    background-color: #7db996 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: #7db996 !important;
+}
+
+button:focus, .btn:focus, button:focus-visible, .btn:focus-visible {
+    outline: none;
+    box-shadow: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}

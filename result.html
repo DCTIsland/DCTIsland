@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查詢結果</title>
+    <link rel="stylesheet" href="result.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="result-box">
+            <h2>查詢結果</h2>
+            <div class="result-content">
+                <p>您的查詢結果將顯示在這裡</p>
+            </div>
+            <div class="button-group">
+                <button class="btn" onclick="window.location.href='index.html'">返回首頁</button>
+                <button class="btn" onclick="window.location.href='loading.html'">重新查詢</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 從 URL 獲取查詢結果
+        const urlParams = new URLSearchParams(window.location.search);
+        const result = urlParams.get('result');
+        const error = urlParams.get('error');
+
+        // 顯示結果或錯誤信息
+        if (error) {
+            Swal.fire({
+                title: '錯誤',
+                text: decodeURIComponent(error),
+                icon: 'error',
+                confirmButtonText: '好的',
+                customClass: {
+                    confirmButton: 'swal2-confirm-button'
+                }
+            });
+        } else if (result) {
+            const resultContent = document.querySelector('.result-content');
+            resultContent.innerHTML = decodeURIComponent(result);
+        }
+    </script>
+</body>
+</html> 
