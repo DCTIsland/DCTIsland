@@ -15,3 +15,48 @@
 *.user
 *.userprefs
 *.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual Environment
+.env/
+.venv/
+env/
+venv/
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / API keys
+.env
+*.json
+*.key
+*.pem
+
+# Firebase & GCP Credentials
+*firebase-adminsdk-*.json
+*service-account*.json
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node (if used)
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
