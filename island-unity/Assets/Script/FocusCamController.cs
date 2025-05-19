@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class FocusCamController : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class FocusCamController : MonoBehaviour
 
     public bool inReturn = false;
     public Transform returnTarget;
-
+    
     void Update()
     {
         if (!allowMove)
@@ -37,7 +38,7 @@ public class FocusCamController : MonoBehaviour
         if (Input.GetMouseButton(1))
         {
             yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
-            transform.rotation = Quaternion.Euler(35, yaw, 0);
+            transform.rotation = Quaternion.Euler(30, yaw, 0);
         }
 
         //movement
@@ -57,8 +58,8 @@ public class FocusCamController : MonoBehaviour
 
     void ReturnToPos()
     {
-        Vector3 targetPos = returnTarget.position + new Vector3(0, 0.8f, 1f);
-        Quaternion targetRot = Quaternion.Euler(35, 180, 0);
+        Vector3 targetPos = returnTarget.position + new Vector3(0, 0.9f, 1.01f);
+        Quaternion targetRot = Quaternion.Euler(30, 180, 0);
         transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 5f);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 5f);
 

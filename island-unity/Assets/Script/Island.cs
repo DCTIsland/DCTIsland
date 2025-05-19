@@ -17,6 +17,7 @@ public class Island : MonoBehaviour
     [SerializeField]
     string id;
     public string thread_id;
+    public string[] topics;
     public IslandType islandBase;
     public Vector2Int worldPos;
     string mascotTexName;
@@ -38,6 +39,7 @@ public class Island : MonoBehaviour
     {
         id = data.key;
         thread_id = data.value.thread_id;
+        topics = new string[3]{data.value.topic1, data.value.topic2, data.value.topic3};
         islandBase = type;
         worldPos = pos;
         mascotTexUrl = mascotTexUrl = TexUrl(data.value.thread_id);
