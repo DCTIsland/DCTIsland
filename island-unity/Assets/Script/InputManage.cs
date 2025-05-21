@@ -18,7 +18,7 @@ public class InputManage : MonoBehaviour
         int rndType = Random.Range(0, emotion.Length);
 
         FirebaseDataThread data = new FirebaseDataThread{
-            emotion = emotion[testTypeArr[i]],
+            emotion = emotion[rndType],
             image_url = "",
             link = "",
             thread_id = $"test{rndID}",

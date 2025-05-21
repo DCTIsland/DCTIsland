@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
+using UnityEngine.UI;
 
 public class InteractPageController : MonoBehaviour
 {
@@ -12,10 +13,12 @@ public class InteractPageController : MonoBehaviour
     [SerializeField] GameObject MainPage;
     [SerializeField] GameObject InputPage;
     [SerializeField] GameObject ErrorPage;
+    [SerializeField] GameObject AutoTipsPage;
     [SerializeField] GameObject WalkPage;
     [SerializeField] GameObject ThanksPage;
 
     [SerializeField] TMP_InputField input;
+    [SerializeField] Image[] tipsImages;
 
     [SerializeField] VCamManager VCManager;
     [SerializeField] FocusCamController focusCamController;
@@ -45,6 +48,27 @@ public class InteractPageController : MonoBehaviour
         ErrorPage.SetActive(true);
     }
 
+    public void ShowAutoTipsPage(System.Action callback = null)
+    {
+        CloseAllPage();
+        BG.SetActive(true);
+        AutoTipsPage.SetActive(true);
+
+        Sequence tipsAnim = DOTween.Sequence();
+        tipsAnim.Append(tipsImages[0].DOFade(1, 1f));
+        tipsAnim.Append(tipsImages[1].DOFade(1, 1f));
+        tipsAnim.Append(tipsImages[2].DOFade(1, 1f));
+        tipsAnim.AppendInterval(0.8f);
+        tipsAnim.OnComplete(() =>
+        {
+            tipsImages[0].color = new Color(1, 1, 1, 0);
+            tipsImages[1].color = new Color(1, 1, 1, 0);
+            tipsImages[2].color = new Color(1, 1, 1, 0);
+            ShowWalkPage();
+            callback?.Invoke();
+        });
+    }
+
     public void ShowWalkPage()
     {
         CloseAllPage();
@@ -56,6 +80,7 @@ public class InteractPageController : MonoBehaviour
         CloseAllPage();
         BG.SetActive(true);
         ThanksPage.SetActive(true);
+        VCManager.ToWholeCamera();
     }
 
     void CloseAllPage()
@@ -64,6 +89,7 @@ public class InteractPageController : MonoBehaviour
         MainPage.SetActive(false);
         InputPage.SetActive(false);
         ErrorPage.SetActive(false);
+        AutoTipsPage.SetActive(false);
         WalkPage.SetActive(false);
         ThanksPage.SetActive(false);
     }
@@ -85,8 +111,7 @@ public class InteractPageController : MonoBehaviour
             {
                 searchSuccess = 1;
                 this.island = island;
-                ShowWalkPage();
-                VCManager.ToFocusCamera(island);
+                ShowAutoTipsPage(() => VCManager.ToFocusCamera(island));
                 break;
             }
         }
@@ -96,6 +121,8 @@ public class InteractPageController : MonoBehaviour
         {
             ShowErrorPage();
         }
+
+        input.text = "";
     }
 
     public void RndToOtherIsland()
@@ -113,8 +140,7 @@ public class InteractPageController : MonoBehaviour
             island = islandManage.islandInWorldQueue.ElementAt(rnd);
         }
 
-        ShowWalkPage();
-        VCManager.ToFocusCamera(island);
+        ShowAutoTipsPage(() => VCManager.ToFocusCamera(island));
     }
 
     public void ResetPosition()
