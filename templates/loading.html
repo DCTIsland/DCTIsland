@@ -40,7 +40,7 @@
     </style>
 </head>
 <body>
-    <div id="hint-box">掃描看看桌上的圖案吧<br>可以旋轉放大模型喔</div>
+    <div id="hint-box">掃描看看桌上的圖案吧<br>可以旋轉放大模型喔<br><span style="color: #5C5C5C; font-size: 14px;">結果生成中請勿關閉或刷新此頁面！</span></div>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
         <!-- 第一個標記 -->
@@ -222,12 +222,12 @@
                 // 自創模式，跳轉到 process_custom
                 setTimeout(() => {
                     window.location.href = `/process_custom?user_id=${encodeURIComponent(userId)}&user_thought=${encodeURIComponent(userId)}`;
-                }, 20000);
+                }, 60000);
             } else {
                 // 正常模式，跳轉到 process
                 setTimeout(() => {
                     window.location.href = `/process?thread_id=${encodeURIComponent(threadId)}`;
-                }, 20000);
+                }, 60000);
             }
         });
     </script>

@@ -108,11 +108,11 @@ h2 {
 }
 
 .nav-button:first-of-type {
-    left: -10px;
+    left: 7px;
 }
 
 .nav-button:last-of-type {
-    right: -10px;
+    right: 7px;
 }
 
 /* 情緒與關鍵字區域 */
@@ -180,6 +180,18 @@ h2 {
 
 /* 被選中的關鍵字框 */
 .topics li.active {
+    background-color: #7db996;
+    color: white;
+}
+
+/* 其他關鍵字的樣式 */
+.topics ul:nth-of-type(2) li {
+    border: 2px solid #e1d8c8;
+    background-color: #FDF6EC;
+    color: #c1b9ac;
+}
+
+.topics ul:nth-of-type(2) li.active {
     background-color: #7db996;
     color: white;
 }
@@ -459,6 +471,25 @@ h2 {
 
 .swal2-confirm:hover {
     background-color: #E19D2D !important;
+}
+
+/* 特定彈窗的按鈕樣式 */
+.swal2-popup.beg-popup .swal2-actions,
+.swal2-popup[data-custom-class="beg-popup"] .swal2-actions {
+    gap: 1em !important;
+    margin-top: 1em !important;
+}
+
+.swal2-popup.beg-popup .swal2-confirm,
+.swal2-popup[data-custom-class="beg-popup"] .swal2-confirm {
+    background-color: #b0a89c !important;
+    border-color: #b0a89c !important;
+}
+
+.swal2-popup.beg-popup .swal2-confirm:hover,
+.swal2-popup[data-custom-class="beg-popup"] .swal2-confirm:hover {
+    background-color: #9a9389 !important;
+    border-color: #9a9389 !important;
 }
 
 /* 成功圖標顏色 */

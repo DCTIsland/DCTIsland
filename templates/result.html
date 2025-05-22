@@ -9,6 +9,12 @@
     <title>緒島</title>
     <!-- 添加 SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-actions-custom {
+            gap: 20px !important;
+            margin-top: 20px !important;
+        }
+    </style>
 </head>
 <body>
     <!-- 上方綠色區塊 -->
@@ -35,6 +41,9 @@
                     <p class="hex-text"><img src="static/Polygon.png" class="hex-icon">島嶼關鍵字<img src="static/Polygon.png" class="hex-icon"></p>
                     <ul>
                         <li>＃{{ topics[0] }}</li>
+                    </ul>
+                    <p class="hex-text"><img src="static/Polygon.png" class="hex-icon">其他關鍵字<img src="static/Polygon.png" class="hex-icon"></p>
+                    <ul>
                         <li>＃{{ topics[1] }}</li>
                         <li>＃{{ topics[2] }}</li>
                     </ul>
@@ -197,6 +206,18 @@
 
     nextButton.addEventListener('click', () => {
         currentIndex = (currentIndex + 1) % images.length;
+        updateImage(currentIndex);
+    });
+
+    // 情緒框點擊事件
+    emotionBox.addEventListener('click', () => {
+        currentIndex = 0;
+        updateImage(currentIndex);
+    });
+
+    // 關鍵字點擊事件 - 只對第一個關鍵字生效
+    topicItems[0].addEventListener('click', () => {
+        currentIndex = 1;
         updateImage(currentIndex);
     });
 
@@ -384,40 +405,6 @@
                     star.classList.remove('active');
                 }
             });
-
-            // 彩蛋：只顯示一次
-            if (rating <= 3 && !begPopupShown) {
-                begPopupShown = true;
-                Swal.fire({
-                    title: '您真的忍心嗎！？',
-                    text: '我們會努力做得更好的！',
-                    imageUrl: '/static/error.gif',
-                    imageWidth: 120,
-                    imageHeight: 120,
-                    showCancelButton: true,
-                    confirmButtonText: '大發慈悲',
-                    cancelButtonText: '狠心評分',
-                    confirmButtonColor: '#F2B137',
-                    cancelButtonColor: '#b0a89c',
-                    background: '#FDF6EC',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    reverseButtons: true,
-                    customClass: {
-                        popup: 'swal2-popup',
-                        title: 'swal2-title',
-                        htmlContainer: 'swal2-html-container',
-                        confirmButton: 'swal2-confirm',
-                        cancelButton: 'swal2-cancel'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        selectedRating = 5;
-                        updateStars(5);
-                    }
-                    // 若點擊狠心評分，什麼都不做
-                });
-            }
         }
         
         submitFeedbackBtn.addEventListener('click', async () => {
@@ -458,6 +445,43 @@
                 return;
             }
 
+            // 檢查是否需要顯示彩蛋popup
+            if (selectedRating <= 3 && !begPopupShown) {
+                begPopupShown = true;
+                const result = await Swal.fire({
+                    title: '您真的忍心嗎！？',
+                    text: '我們會努力做得更好的！',
+                    imageUrl: '/static/error.gif',
+                    imageWidth: 120,
+                    imageHeight: 120,
+                    showCancelButton: true,
+                    confirmButtonText: '狠心評分',
+                    cancelButtonText: '大發慈悲',
+                    confirmButtonColor: '#b0a89c',
+                    cancelButtonColor: '#F2B137',
+                    background: '#FDF6EC',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    customClass: {
+                        popup: 'swal2-popup beg-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    },
+                    buttonsStyling: true,
+                    reverseButtons: true,
+                    heightAuto: false,
+                });
+
+                if (result.isDismissed) {
+                    // 如果點擊大發慈悲，重置評分為5星但不送出
+                    selectedRating = 5;
+                    updateStars(5);
+                    return; // 直接返回，不繼續執行送出
+                }
+            }
+
             try {
                 const response = await fetch('/submit_feedback', {
                     method: 'POST',
@@ -489,8 +513,8 @@
                         }
                     });
                     feedbackInput.value = ''; // 清空輸入框
-                    selectedRating = 0; // 重置評分
-                    updateStars(0); // 重置星星
+                    selectedRating = 5; // 重置評分為5星
+                    updateStars(5); // 重置星星為5星
                 } else {
                     Swal.fire({
                         title: '提交失敗',

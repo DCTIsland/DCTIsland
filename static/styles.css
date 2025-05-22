@@ -360,3 +360,62 @@ button:focus-visible, .btn:focus-visible {
     box-shadow: none;
 }
 
+.intro-wrapper {
+    width: 80%;
+    margin: 0 auto;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.8;
+    color: #5C5C5C;
+    margin-top: 5%;
+    margin-bottom: 10%;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* 自定義滾動條樣式 */
+.intro-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.intro-wrapper::-webkit-scrollbar-track {
+    background: #e1d8c8;
+    border-radius: 3px;
+}
+
+.intro-wrapper::-webkit-scrollbar-thumb {
+    background: #b0a89c;
+    border-radius: 3px;
+}
+
+.intro-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #6d6d6daf;
+}
+
+.intro-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+.intro-icon {
+    width: 29px;
+    height: 29px;
+    background: #F2B137;
+    color: #fff;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    margin-top: 2px;
+}
+.intro-desc {
+    flex: 1;
+    text-align: left;
+    color: #6d6d6daf;
+    font-weight: normal;
+}

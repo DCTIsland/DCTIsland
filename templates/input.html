@@ -5,6 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>緒島</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* SweetAlert2 自定義樣式 */
+        .swal2-popup {
+            font-family: "Microsoft JhengHei", sans-serif;
+            border-radius: 30px;
+            background-color: #FDF6EC;
+            border: 4px solid #7db996;
+            margin: 15px;
+            padding: 15px;
+            width: 85% !important;
+            max-width: 350px !important;
+        }
+
+        .swal2-title {
+            color: #4A4A4A;
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .swal2-html-container {
+            color: #666666;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .swal2-actions {
+            margin: 20px 0 10px 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 20px !important;
+        }
+
+        .swal2-confirm, .swal2-cancel {
+            min-width: 100px;
+            border-radius: 25px !important;
+            font-size: 1em !important;
+            padding: 10px 30px !important;
+            margin: 0 !important;
+            border: none !important;
+            flex: 0 1 auto !important;
+        }
+
+        .swal2-confirm {
+            background-color: #F2B137 !important;
+        }
+
+        .swal2-confirm:hover {
+            background-color: #E19D2D !important;
+        }
+
+        .swal2-cancel {
+            background-color: #b0a89c !important;
+        }
+
+        .swal2-cancel:hover {
+            background-color: #9a9389 !important;
+        }
+
+        button:focus, .btn:focus, button:focus-visible, .btn:focus-visible {
+            outline: none;
+            box-shadow: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
     <!-- <link rel="stylesheet" href='static/styles.css'> -->
     <!-- <link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet"> -->
 </head>
@@ -15,7 +85,7 @@
     <!-- 主要內容容器 -->
     <div class="container">
 
-        <h1>STEP 1</h1>
+        <h1>STEP 2</h1>
         <p>輸入您的Threads帳號。</p>
 
         <div class="form-container">
@@ -26,7 +96,7 @@
                 </div>
                 <button type="submit" class="submit-btn">生成我的島嶼</button>
             </form>
-        <a href="/custom_input" class="no-threads-account" style="-webkit-tap-highlight-color: transparent;">我沒有Threads帳號&gt;</a>
+            <a href="/mode" class="no-threads-account" style="-webkit-tap-highlight-color: transparent; text-underline-offset: 1px;" onmouseover="this.style.color='#999'" onmouseout="this.style.color='inherit'">返回選擇其他模式 &gt;</a>
         </div>
     </div>
 
@@ -83,5 +153,75 @@
         window.addEventListener('load', adjustCharacter);
         window.addEventListener('resize', adjustCharacter);
     </script>    
+    <script>
+    document.getElementById('threadsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        try {
+            const response = await fetch('/submit', {
+                method: 'POST',
+                body: formData
+            });
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                if (data.status === 'duplicate') {
+                    Swal.fire({
+                        title: 'Oops！',
+                        text: '你已經是島民了，要看看嗎？',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '查看',
+                        cancelButtonText: '取消',
+                        confirmButtonColor: '#F2B137',
+                        cancelButtonColor: '#b0a89c',
+                        background: '#FDF6EC',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm',
+                            cancelButton: 'swal2-cancel'
+                        },
+                        buttonsStyling: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/search';
+                        }
+                    });
+                    return;
+                }
+            } else {
+                // 不是 JSON，代表是 HTML，直接顯示 loading 頁面
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+                return;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: '提交過程中發生錯誤，請稍後再試',
+                icon: 'error',
+                confirmButtonText: '好的',
+                confirmButtonColor: '#F2B137',
+                background: '#FDF6EC',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                },
+                buttonsStyling: true
+            });
+        }
+    });
+    </script>
 </body>
 </html>

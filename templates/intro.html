@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>緒島</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .intro-wrapper {
+      width: 100%;
+      margin-top: 1%;
+      margin-bottom: 150px;
+      max-height: 48vh;
+      overflow-y: auto;
+      padding: 0 20px;
+      padding-right: 30px;
+      margin-right: -10px;
+      scrollbar-width: thin;
+      scrollbar-color: #c9c0b3 transparent;
+    }
+
+    .intro-step {
+      width: 100%;
+      margin: 0 auto 0px;
+      background-color: #FDF6EC;
+      border-radius: 12px;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .intro-icon {
+      width: 24px;
+      height: 24px;
+      background-color: #F2B137;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+      flex-shrink: 0;
+      font-size: 14px;
+      margin-left: -19px;
+    }
+
+    .intro-desc {
+      flex: 1;
+      line-height: 1.6;
+      color: #6d6d6daf;
+      font-size: 16px;
+    }
+
+    .intro-wrapper::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .intro-wrapper::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .intro-wrapper::-webkit-scrollbar-thumb {
+      background-color: #c9c0b3;
+      border-radius: 4px;
+    }
+
+    .intro-wrapper:hover::-webkit-scrollbar-thumb {
+      background-color: #b3a99a;
+    }
+
+    .intro-wrapper::-webkit-scrollbar-thumb:hover {
+      background-color: #b3a99a;
+    }
+
+    .button-container {
+      margin: 0;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      bottom: 100px;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .button-container .submit-btn2 {
+      width: 50%;
+      white-space: nowrap;
+      font-size: clamp(14px, 2vw, 16px);
+    }
+  </style>
+</head>
+<body>
+    <div class="header"></div>
+    <div class="container">
+    <h1>在登島之前…</h1>
+    <p style="font-size: 16px; color: #6d6d6daf; width: 80%; margin: 0 auto 3%; letter-spacing: 2px; text-align: left; margin-top: 20px; margin-bottom: 10px;">嗨！歡迎來到緒島，在登島之前，請先詳閱以下說明：</p>
+
+    <div class="intro-wrapper">
+        <div class="intro-step">
+          <div class="intro-icon">1</div>
+          <div class="intro-desc">輸入 <b>Threads</b> 帳號或自訂內容來建立專屬於自己的島嶼。</div>
+        </div>
+        <div class="intro-step">
+          <div class="intro-icon">2</div>
+          <div class="intro-desc">輸入帳號後會進入 AR 體驗頁面，請允許鏡頭授權，掃描畫面中出現的島嶼 QRCode 即可探索各個島嶼。</div>
+        </div>
+        <div class="intro-step">
+          <div class="intro-icon">3</div>
+          <div class="intro-desc">島嶼建立過程中，為避免資料遺失，請勿重新整理或關閉此畫面。</div>
+        </div>
+        <div class="intro-step">
+          <div class="intro-icon">4</div>
+          <div class="intro-desc">島嶼的生成不代表你在網路上的真實情緒。若有情緒上的詞句，是根據你發過的 Threads 自動所生成。</div>
+        </div>
+        <div class="intro-step">
+          <div class="intro-icon">5</div>
+          <div class="intro-desc">生成島嶼後，可至後方投影區自由探索自己與他人生成的島嶼！</div>
+        </div>
+    </div>
+    <div class="button-container">
+      <button class="submit-btn" style="letter-spacing: 2px; font-weight: bold; width: 60%; margin-top: 10px;" onclick="window.location.href='/mode'" disabled>我知道了！</button>
+    </div>
+  <div class="footer">
+  </div>
+
+  <script>
+    const wrapper = document.querySelector('.intro-wrapper');
+    const button = document.querySelector('.submit-btn');
+    let hasReachedBottom = false;
+
+    function checkScroll() {
+      const isAtBottom = wrapper.scrollHeight - wrapper.scrollTop <= wrapper.clientHeight + 1;
+      if (isAtBottom && !hasReachedBottom) {
+        hasReachedBottom = true;
+        button.disabled = false;
+        button.classList.add('active');
+      }
+    }
+
+    wrapper.addEventListener('scroll', checkScroll);
+    // 初始檢查
+    checkScroll();
+  </script>
+</body>
+</html>

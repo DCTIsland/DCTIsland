@@ -5,6 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>緒島</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* SweetAlert2 自定義樣式 */
+        .swal2-popup {
+            font-family: "Microsoft JhengHei", sans-serif;
+            border-radius: 30px;
+            background-color: #FDF6EC;
+            border: 4px solid #7db996;
+            margin: 15px;
+            padding: 15px;
+            width: 85% !important;
+            max-width: 350px !important;
+        }
+
+        .swal2-title {
+            color: #4A4A4A;
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .swal2-html-container {
+            color: #666666;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .swal2-actions {
+            margin-bottom: 18px !important;
+            gap: 20px !important;
+        }
+
+        .swal2-confirm, .swal2-cancel {
+            min-width: 120px;
+            border-radius: 25px !important;
+            font-size: 1em !important;
+            padding: 10px 30px !important;
+            margin: 0 8px !important;
+            border: none !important;
+        }
+
+        .swal2-confirm {
+            background-color: #F2B137 !important;
+        }
+
+        .swal2-confirm:hover {
+            background-color: #E19D2D !important;
+        }
+
+        .swal2-cancel {
+            background-color: #b0a89c !important;
+        }
+
+        .swal2-cancel:hover {
+            background-color: #9a9389 !important;
+        }
+
+        button:focus, .btn:focus, button:focus-visible, .btn:focus-visible {
+            outline: none;
+            box-shadow: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
 </head>
 <body>
     <!-- 上方綠色區塊 -->
@@ -13,26 +80,27 @@
     <!-- 主要內容容器 -->
     <div class="container">
 
-        <h1>STEP 1</h1>
-        <p>輸入您的自訂ID跟今天的想法吧。</p>
+        <h1>STEP 2</h1>
+        <p>輸入您的ID跟今天的想法吧。</p>
 
         <div class="form-cosntainer">
             <form class="form" id="customForm" action="/custom_submit" method="POST">
-                <div class="input-container">
+                <div class="input-container" style="margin-top: 20px;">
                     <label for="user_id">＠</label>
-                    <input type="text" id="user_id" name="user_id" placeholder="" maxlength="20" pattern="[a-zA-Z0-9]{1,20}" required>
+                    <input type="text" id="user_id" name="user_id" placeholder="" maxlength="20" pattern="[a-zA-Z0-9._]{1,20}" required>
                 </div>
                 <div class="text-container">
                     <textarea class="user_thought" id="user_thought" name="user_thought" placeholder="請輸入500字以內的內容" maxlength="500" required></textarea>
                 </div>
                 <button type="submit" class="submit-btn1">生成我的島嶼</button>
             </form>
+            <a href="/mode" class="no-threads-account" style="-webkit-tap-highlight-color: transparent; text-underline-offset: 1px; margin-top: 15px; display: block;" onmouseover="this.style.color='#999'" onmouseout="this.style.color='inherit'">返回選擇其他模式 &gt;</a>
         </div>
     </div>
 
     <div class="footer"></div> <!-- 單條綠色區塊 -->
         <div class="footer-character">
-                <img src="static/Threadman.png" alt="Threadman">
+                <img src="static/Threadman.png" alt="Threadman" style="width: 50%; transform: translateX(20px) translateY(-7px);">
             </div>
         </div>        
     </div>
@@ -64,6 +132,68 @@
         if (isSafari || isLine) {
             document.querySelector('.footer-character').style.display = 'none';
         }
+
+        // 表單提交處理
+        document.getElementById('customForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('/custom_submit', {
+                    method: 'POST',
+                    body: formData
+                });
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    if (data.status === 'duplicate') {
+                        Swal.fire({
+                            title: 'Oops！',
+                            text: '島民已經存在，換一個試試',
+                            icon: 'warning',
+                            confirmButtonText: '好的',
+                            confirmButtonColor: '#F2B137',
+                            background: '#FDF6EC',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                popup: 'swal2-popup',
+                                title: 'swal2-title',
+                                htmlContainer: 'swal2-html-container',
+                                confirmButton: 'swal2-confirm'
+                            },
+                            buttonsStyling: true
+                        });
+                        return;
+                    }
+                } else {
+                    // 不是 JSON，代表是 HTML，直接顯示 loading 頁面
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    return;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: '錯誤',
+                    text: '提交過程中發生錯誤，請稍後再試',
+                    icon: 'error',
+                    confirmButtonText: '好的',
+                    confirmButtonColor: '#F2B137',
+                    background: '#FDF6EC',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    },
+                    buttonsStyling: true
+                });
+            }
+        });
     </script>
 </body>
 </html>

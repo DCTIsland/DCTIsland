@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>緒島</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .mode-list {
+      width: 100%;
+      margin-top: 5%;
+      margin-bottom: 5%;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 0 20px;
+      padding-right: 40px;
+      margin-right: -20px;
+      scrollbar-width: thin;
+      scrollbar-color: #c9c0b3 transparent;
+    }
+
+    .mode-option {
+      width: 100%;
+      margin: 0 auto 32px;
+      background-color: #FDF6EC;
+      border: 2px solid #7db996;
+      border-radius: 12px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .mode-option h2 {
+      color: #7db996;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .mode-option ul {
+      text-align: left;
+      color: #6d6d6daf;
+      font-size: 16px;
+      line-height: 1.8;
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .mode-option ul li {
+      color: #6d6d6daf;
+      font-weight: normal;
+    }
+
+    .mode-option ul li::before {
+      content: "✔";
+      color: #7db996;
+      margin-right: 8px;
+    }
+
+    .mode-option button {
+      margin-top: 15px;
+      width: 88%;
+      white-space: nowrap;
+      font-size: clamp(14px, 2vw, 16px);
+    }
+
+    .mode-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .mode-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .mode-list::-webkit-scrollbar-thumb {
+      background-color: #c9c0b3;
+      border-radius: 4px;
+    }
+
+    .mode-list:hover::-webkit-scrollbar-thumb {
+      background-color: #b3a99a;
+    }
+
+    .mode-list::-webkit-scrollbar-thumb:hover {
+      background-color: #b3a99a;
+    }
+  </style>
+</head>
+<body>
+  <div class="header"></div>
+  <div class="container">
+    <h1>STEP 1</h1>
+    <p>選擇您的建島方式。</p>
+
+    <div class="mode-list">
+      <!-- Threads 建島模式 -->
+      <div class="mode-option">
+        <h2>Threads建島模式</h2>
+        <ul>
+          <li>有Threads帳號</li>
+          <li>帳號為公開</li>
+          <li>曾發布過貼文</li>
+        </ul>
+        <button class="submit-btn2" onclick="window.location.href='/input'">我要用 Threads 帳號建島</button>
+      </div>
+
+      <!-- 自訂內容建島模式 -->
+      <div class="mode-option">
+        <h2>自訂內容建島模式</h2>
+        <ul>
+          <li>發揮創意，打造理想島嶼！</li>
+          <li>避免以太常見的名字作為ID</li>
+        </ul>
+        <button class="submit-btn2" onclick="window.location.href='/custom_input'">我想自由創造島嶼</button>
+      </div>
+
+      <!-- 搜尋已有的島嶼 -->
+      <div style="margin-bottom: 30%;" class="mode-option">
+        <h2>搜尋已有的島嶼</h2>
+        <ul>
+          <li>想找找朋友或自己的島？</li>
+          <li>輸入ID即可快速探索！</li>
+        </ul>
+        <button class="submit-btn2" onclick="window.location.href='/search'">我要搜尋島嶼</button>
+      </div>
+    </div>
+
+    <a href="/mode" class="no-threads-account" style="-webkit-tap-highlight-color: transparent; text-underline-offset: 1px;" onmouseover="this.style.color='#999'" onmouseout="this.style.color='inherit'">返回選擇其他模式 &gt;</a>
+  </div>
+  <div class="footer"></div>
+</body>
+</html>
