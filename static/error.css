@@ -93,12 +93,12 @@ body, html {
 
 /* 角色圖片 */
 .footer-character img {
-    width: 55%; /* 縮小圖片 */
+    width: 44%; /* 縮小圖片 */
     max-width: 300px;
     aspect-ratio: 1 / 1; 
     position: absolute;
     bottom: 105px; /* 讓下半部壓在綠色區塊上 */
-    left: 22%; /* 稍微靠左 */
+    left: 28%; /* 稍微靠左 */
 }
 
 .back-btn {

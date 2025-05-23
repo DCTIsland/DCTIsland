@@ -94,7 +94,7 @@
                     <label for="thread_id">＠</label>
                     <input type="text" id="thread_id" name="thread_id" placeholder="" required>
                 </div>
-                <button type="submit" class="submit-btn">生成我的島嶼</button>
+                <button type="submit" class="submit-btn" disabled>生成我的島嶼</button>
             </form>
             <a href="/mode" class="no-threads-account" style="-webkit-tap-highlight-color: transparent; text-underline-offset: 1px;" onmouseover="this.style.color='#999'" onmouseout="this.style.color='inherit'">返回選擇其他模式 &gt;</a>
         </div>
@@ -153,75 +153,5 @@
         window.addEventListener('load', adjustCharacter);
         window.addEventListener('resize', adjustCharacter);
     </script>    
-    <script>
-    document.getElementById('threadsForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        try {
-            const response = await fetch('/submit', {
-                method: 'POST',
-                body: formData
-            });
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                if (data.status === 'duplicate') {
-                    Swal.fire({
-                        title: 'Oops！',
-                        text: '你已經是島民了，要看看嗎？',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: '查看',
-                        cancelButtonText: '取消',
-                        confirmButtonColor: '#F2B137',
-                        cancelButtonColor: '#b0a89c',
-                        background: '#FDF6EC',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        customClass: {
-                            popup: 'swal2-popup',
-                            title: 'swal2-title',
-                            htmlContainer: 'swal2-html-container',
-                            confirmButton: 'swal2-confirm',
-                            cancelButton: 'swal2-cancel'
-                        },
-                        buttonsStyling: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/search';
-                        }
-                    });
-                    return;
-                }
-            } else {
-                // 不是 JSON，代表是 HTML，直接顯示 loading 頁面
-                const html = await response.text();
-                document.open();
-                document.write(html);
-                document.close();
-                return;
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            Swal.fire({
-                title: '錯誤',
-                text: '提交過程中發生錯誤，請稍後再試',
-                icon: 'error',
-                confirmButtonText: '好的',
-                confirmButtonColor: '#F2B137',
-                background: '#FDF6EC',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                },
-                buttonsStyling: true
-            });
-        }
-    });
-    </script>
 </body>
 </html>

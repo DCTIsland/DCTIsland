@@ -17,6 +17,7 @@ from nested_lookup import nested_lookup
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, request, redirect, url_for, Response, abort, jsonify
 from datetime import datetime
+from flask import session
 
 app = Flask(__name__)
 
@@ -85,7 +86,7 @@ async def scrape_thread_text(url: str) -> dict:
         context = await browser.new_context(viewport={"width": 1920, "height": 1080})
         page = await context.new_page()
         await page.goto(url)
-        await page.wait_for_selector("[data-pressable-container=true]")
+        await page.wait_for_selector("[data-pressable-container=true]", timeout=5000)
         selector = Selector(await page.content())
         hidden_datasets = selector.css('script[type="application/json"][data-sjs]::text').getall()
 
@@ -307,23 +308,11 @@ def search_page():
 def search_submit():
     thread_id = request.form.get('thread_id', '').lower()
     if not thread_id or not THREADS_ID_REGEX.match(thread_id):
-        return render_template("error.html", error="無效的 ID, 請確認格式正確！"), 400
-
-    # 檢查資料是否已存在
+        return redirect(url_for('error_page', msg="無效的 ID, 請確認格式正確！")), 400
     existing_data = is_thread_in_firebase(thread_id)
     if existing_data:
-        # 資料已存在，直接渲染結果頁面
-        return render_template(
-            'result.html',
-            thread_id=existing_data['thread_id'],
-            full_url=existing_data['link'],
-            img_url=existing_data.get('image_url', ''),
-            snapshot_url=existing_data.get('snapshot_url', ''),
-            topics=[existing_data['topic1'], existing_data['topic2'], existing_data['topic3']],
-            emotion=existing_data['emotion']
-        )
+        return redirect(url_for('result_page', thread_id=thread_id))
     else:
-        # 資料不存在，返回 404 狀態碼
         return "查無此資料，請先建立島嶼！", 404
 
 @app.route('/input')
@@ -334,78 +323,64 @@ def input_page():
 async def submit():
     thread_id = request.form.get('thread_id', '').lower()
     if not thread_id or not THREADS_ID_REGEX.match(thread_id):
-        return render_template("error.html", error="無效的 Threads ID, 請確認格式正確！")
-
-    # 檢查資料是否已存在
+        return redirect(url_for('error_page', msg="無效的 Threads ID, 請確認格式正確！"))
+    
+    # 檢查ID是否存在於Threads（用is_url_accessible）
+    full_url = THREADS_BASE_URL + thread_id
+    if not is_url_accessible(full_url):
+        return redirect(url_for('error_page', msg=f"生成的 URL 無效或不存在：{full_url}"))
+    
     existing_data = is_thread_in_firebase(thread_id)
     if existing_data:
-        # 資料已存在，返回 JSON 響應
-        return jsonify({
-            'status': 'duplicate',
-            'title': 'Oops！',
-            'message': '你已經是島民了，要看看嗎？',
-            'redirect_url': url_for('search_submit', thread_id=thread_id)
-        })
+        return redirect(url_for('result_page', thread_id=thread_id))
     
-    # 如果資料不存在，直接返回 loading 頁面
+    # 如果所有檢查都通過，才進入 loading 頁面
     return render_template('loading.html', thread_id=thread_id)
-    
+
 @app.route('/loading', methods=['POST'])
 def loading():
-    # 從表單中獲取 thread_id 或 user_id
     thread_id = request.form.get('thread_id', '').lower()
     user_id = request.form.get('user_id', '').lower()
     user_thought = request.form.get('user_thought')
-    
     if user_id:
         return render_template('loading.html', user_id=user_id, user_thought=user_thought)
     elif thread_id and THREADS_ID_REGEX.match(thread_id):
         return render_template('loading.html', thread_id=thread_id)
     else:
-        return render_template("error.html", error="無效的 ID, 請確認格式正確！")
+        return redirect(url_for('error_page', msg="無效的 ID, 請確認格式正確！"))
 
 @app.route('/process', methods=['GET'])
 async def process():
     thread_id = request.args.get('thread_id', '').lower()
     if not thread_id or not THREADS_ID_REGEX.match(thread_id):
-        return render_template("error.html", error="無效的 Threads ID, 請確認格式正確！")
-
-    # 檢查資料是否已存在
+        return redirect(url_for('error_page', msg="無效的 Threads ID, 請確認格式正確！"))
+    
     existing_data = is_thread_in_firebase(thread_id)
     if existing_data:
-        # 資料已存在，返回 JSON 響應
-        return jsonify({
-            'status': 'duplicate',
-            'message': '此 ID 已存在，是否要查看？'
-        })
-
+        return redirect(url_for('result_page', thread_id=thread_id))
+    
     full_url = THREADS_BASE_URL + thread_id
     if not is_url_accessible(full_url):
-        return render_template("error.html", error=f"生成的 URL 無效或不存在：{full_url}")
-
+        return redirect(url_for('error_page', msg=f"生成的 URL 無效或不存在：{full_url}", thread_id=thread_id))
+    
     try:
         page_data = await scrape_thread_text(full_url)
+        if not page_data or not page_data.get('thread_text'):
+            return redirect(url_for('error_page', msg="無法取得Threads內容，請確認帳號與貼文狀態！", thread_id=thread_id))
+        
         cleaned_text = page_data['thread_text']
         gpt_analysis = analyze_with_gpt(cleaned_text)
         topics = gpt_analysis['keywords']
         emotion = gpt_analysis['emotion']
-
         texture_path = generate_texture_image(thread_id, full_url, topics, emotion)
+        
         if texture_path is None:
-            return render_template("error.html", error="圖片生成失敗，請稍後再試")
-
-        return render_template(
-            'result.html',
-            thread_id=thread_id,
-            full_url=full_url,
-            img_url=texture_path,
-            snapshot_url=f"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/snapshots%2F{thread_id}.png?alt=media",
-            topics=topics,
-            emotion=emotion
-        )
+            return redirect(url_for('error_page', msg="圖片生成失敗，請稍後再試", thread_id=thread_id))
+        
+        return redirect(url_for('result_page', thread_id=thread_id))
     except Exception as e:
         print(f"錯誤發生於 process: {e}")
-        return render_template("error.html", error="處理 Threads 資料時發生錯誤，請確認連線與內容格式是否正確！")
+        return redirect(url_for('error_page', msg="處理 Threads 資料時發生錯誤，請確認連線與內容格式是否正確！", thread_id=thread_id))
 
 @app.route('/proxy-image')
 def proxy_image():
@@ -432,69 +407,40 @@ def custom_input():
 def custom_submit():
     user_id = request.form.get('user_id', '').lower()
     user_thought = request.form.get('user_thought')
-    
     if not user_id or not user_thought:
-        return render_template('error.html', error="請輸入有效的 ID 和想法！")
-    
+        return redirect(url_for('error_page', msg="請輸入有效的 ID 和想法！"))
     if len(user_thought) > 500:
-        return render_template('error.html', error="想法內容不可超過 500 字！")
-
-    # 檢查資料是否已存在
+        return redirect(url_for('error_page', msg="想法內容不可超過 500 字！"))
     if is_thread_in_firebase(user_id):
-        # 如果 ID 已存在，返回 JSON 響應
         return jsonify({
             'status': 'duplicate',
             'title': 'Oops！',
             'message': '島民已經存在，換一個試試'
         })
-
-    # 如果資料不存在，直接返回 loading 頁面
+    # 這裡不需檢查url，因為是自訂內容
     return render_template('loading.html', user_id=user_id, user_thought=user_thought)
 
 @app.route('/process_custom', methods=['GET'])
 async def process_custom():
     user_id = request.args.get('user_id', '').lower()
     if not user_id:
-        return render_template("error.html", error="無效的 User ID！")
-
-    # 再次檢查是否已存在
+        return redirect(url_for('error_page', msg="無效的 User ID！"))
     existing_data = is_thread_in_firebase(user_id)
     if existing_data:
-        return render_template(
-            'result.html',
-            thread_id=existing_data['thread_id'],
-            full_url="Custom Input",
-            img_url=existing_data.get('image_url', ''),
-            snapshot_url=existing_data.get('snapshot_url', ''),
-            topics=[existing_data['topic1'], existing_data['topic2'], existing_data['topic3']],
-            emotion=existing_data['emotion']
-        )
-
-    # 使用 GPT 進行分析
+        return redirect(url_for('result_page', user_id=user_id))
     user_thought = request.args.get('user_thought', '')
     try:
         gpt_analysis = analyze_with_gpt(user_thought)
         topics = gpt_analysis['keywords']
         emotion = gpt_analysis['emotion']
-
         img_url = generate_texture_image(user_id, "Custom Input", topics, emotion)
         if img_url is None:
             raise ValueError("圖片生成失敗")
-
         snapshot_url = f"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/snapshots%2F{user_id}.png?alt=media"
-
-        return render_template(
-            'result.html',
-            thread_id=user_id,
-            full_url="Custom Input",
-            img_url=img_url,
-            snapshot_url=snapshot_url,
-            topics=topics,
-            emotion=emotion
-        )
+        return redirect(url_for('result_page', user_id=user_id))
     except Exception as e:
         print(f"錯誤發生於 process_custom: {e}")
-        return render_template("error.html", error="處理自訂輸入時發生錯誤，請檢查內容格式")
+        return redirect(url_for('error_page', msg="處理自訂輸入時發生錯誤，請檢查內容格式", user_id=user_id))
 
 @app.route('/submit_feedback', methods=['POST'])
 def submit_feedback():
@@ -529,6 +475,60 @@ def submit_feedback():
     except Exception as e:
         print(f"Error submitting feedback: {e}")
         return {"status": "error", "message": "Failed to submit feedback"}, 500
+
+@app.route('/result')
+def result_page():
+    thread_id = request.args.get('thread_id')
+    data = is_thread_in_firebase(thread_id)
+    if not data:
+        return redirect(url_for('error_page', msg="查無此資料", thread_id=thread_id))
+    return render_template(
+        'result.html',
+        thread_id=data['thread_id'],
+        full_url=data['link'],
+        img_url=data.get('image_url', ''),
+        snapshot_url=data.get('snapshot_url', ''),
+        topics=[data['topic1'], data['topic2'], data['topic3']],
+        emotion=data['emotion']
+    )
+
+@app.route('/error')
+def error_page():
+    msg = request.args.get('msg', '發生未知錯誤')
+    return render_template('error.html', error=msg)
+
+@app.route('/check_status')
+def check_status():
+    thread_id = request.args.get('thread_id', '').lower()
+    if not thread_id or not THREADS_ID_REGEX.match(thread_id):
+        return jsonify({
+            'status': 'error',
+            'message': '無效的 Threads ID, 請確認格式正確！',
+            'redirect_url': url_for('error_page', msg="無效的 Threads ID, 請確認格式正確！")
+        })
+    
+    # 檢查ID是否存在於Threads
+    full_url = THREADS_BASE_URL + thread_id
+    if not is_url_accessible(full_url):
+        return jsonify({
+            'status': 'error',
+            'message': f'生成的 URL 無效或不存在：{full_url}',
+            'redirect_url': url_for('error_page', msg=f"生成的 URL 無效或不存在：{full_url}")
+        })
+    
+    # 檢查是否已存在於資料庫
+    existing_data = is_thread_in_firebase(thread_id)
+    if existing_data:
+        return jsonify({
+            'status': 'duplicate',
+            'message': '你已經是島民了，要看看嗎？',
+            'redirect_url': url_for('result_page', thread_id=thread_id)
+        })
+    
+    return jsonify({
+        'status': 'processing',
+        'message': '正在處理中...'
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
