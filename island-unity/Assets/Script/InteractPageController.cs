@@ -94,9 +94,17 @@ public class InteractPageController : MonoBehaviour
         ThanksPage.SetActive(false);
     }
 
+    public void OnInputEndEdit()
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            Search();
+        }
+    }
+
     public void Search()
     {
-        string text = input.text;
+        string text = input.text.ToLower();
 
         // check if the input is empty
         if (!Regex.IsMatch(text, @"^[a-zA-Z0-9._]+$"))
