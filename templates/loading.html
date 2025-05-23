@@ -222,12 +222,12 @@
                 // 自創模式，跳轉到 process_custom
                 setTimeout(() => {
                     window.location.href = `/process_custom?user_id=${encodeURIComponent(userId)}&user_thought=${encodeURIComponent(userId)}`;
-                }, 60000);
+                }, 45000);
             } else {
                 // 正常模式，跳轉到 process
                 setTimeout(() => {
                     window.location.href = `/process?thread_id=${encodeURIComponent(threadId)}`;
-                }, 60000);
+                }, 45000);
             }
         });
     </script>
