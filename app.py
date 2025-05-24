@@ -8,6 +8,7 @@ import jmespath
 import random
 import base64
 import firebase_admin
+import pytz
 from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, storage, db
 from typing import Dict
@@ -261,8 +262,9 @@ def upload_to_firebase_storage(image_data, threads_id):
 # 儲存 Firebase Storage 圖片 URL 至 Firebase Database
 def save_url_to_firebase(threads_id, url, img_url, topics, emotion, snapshot_url=""):
     try:
-        # 獲取當前時間並格式化
-        current_time = datetime.now()
+        # 獲取當前台灣時間並格式化
+        tz = pytz.timezone('Asia/Taipei')
+        current_time = datetime.now(tz)
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
         snapshot_url = f"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/snapshots%2F{threads_id}.png?alt=media"
@@ -412,35 +414,38 @@ def custom_submit():
     if len(user_thought) > 500:
         return redirect(url_for('error_page', msg="想法內容不可超過 500 字！"))
     if is_thread_in_firebase(user_id):
-        return jsonify({
-            'status': 'duplicate',
-            'title': 'Oops！',
-            'message': '島民已經存在，換一個試試'
-        })
-    # 這裡不需檢查url，因為是自訂內容
+        return redirect(url_for('result_page', user_id=user_id))
+    # 直接進入 loading 頁面
     return render_template('loading.html', user_id=user_id, user_thought=user_thought)
 
 @app.route('/process_custom', methods=['GET'])
 async def process_custom():
     user_id = request.args.get('user_id', '').lower()
-    if not user_id:
-        return redirect(url_for('error_page', msg="無效的 User ID！"))
+    user_thought = request.args.get('user_thought', '')
+    
+    if not user_id or not user_thought:
+        return redirect(url_for('error_page', msg="無效的輸入！"))
+    
     existing_data = is_thread_in_firebase(user_id)
     if existing_data:
         return redirect(url_for('result_page', user_id=user_id))
-    user_thought = request.args.get('user_thought', '')
+    
     try:
         gpt_analysis = analyze_with_gpt(user_thought)
         topics = gpt_analysis['keywords']
         emotion = gpt_analysis['emotion']
         img_url = generate_texture_image(user_id, "Custom Input", topics, emotion)
+        
         if img_url is None:
-            raise ValueError("圖片生成失敗")
-        snapshot_url = f"https://firebasestorage.googleapis.com/v0/b/dctdb-8c8ad.firebasestorage.app/o/snapshots%2F{user_id}.png?alt=media"
+            return redirect(url_for('error_page', msg="圖片生成失敗，請稍後再試"))
+        
+        # 儲存到 Firebase
+        save_url_to_firebase(user_id, "Custom Input", img_url, topics, emotion)
+        
         return redirect(url_for('result_page', user_id=user_id))
     except Exception as e:
         print(f"錯誤發生於 process_custom: {e}")
-        return redirect(url_for('error_page', msg="處理自訂輸入時發生錯誤，請檢查內容格式", user_id=user_id))
+        return redirect(url_for('error_page', msg="處理自訂輸入時發生錯誤，請稍後再試"))
 
 @app.route('/submit_feedback', methods=['POST'])
 def submit_feedback():
@@ -455,8 +460,9 @@ def submit_feedback():
         # Get reference to the feedback node
         ref = db.reference('feedback')
         
-        # 獲取當前時間並格式化
-        current_time = datetime.now()
+        # 獲取當前台灣時間並格式化
+        tz = pytz.timezone('Asia/Taipei')
+        current_time = datetime.now(tz)
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         
         # Create new feedback entry
@@ -479,9 +485,13 @@ def submit_feedback():
 @app.route('/result')
 def result_page():
     thread_id = request.args.get('thread_id')
-    data = is_thread_in_firebase(thread_id)
+    user_id = request.args.get('user_id')
+    
+    # 使用 thread_id 或 user_id 來查詢資料
+    data = is_thread_in_firebase(thread_id or user_id)
     if not data:
-        return redirect(url_for('error_page', msg="查無此資料", thread_id=thread_id))
+        return redirect(url_for('error_page', msg="查無此資料"))
+    
     return render_template(
         'result.html',
         thread_id=data['thread_id'],
