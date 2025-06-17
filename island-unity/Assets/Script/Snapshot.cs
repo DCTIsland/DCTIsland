@@ -12,13 +12,12 @@ public class Snapshot : MonoBehaviour
 
     public FirebaseManager firebaseManager;
 
-    public void DoTakeSnapshot(string key, string thread_id, Action callback)
+    public void DoTakeSnapshot(string thread_id)
     {
         Camera cam = gameObject.GetComponent<Camera>();
         var tex = TakeSnapshot(cam, width, height);
-        SaveTexture(tex, thread_id, key);
+        SaveTexture(tex, thread_id);
         Debug.Log("Take snapshot successful");
-        callback.Invoke();
     }
 
     static Texture2D TakeSnapshot(Camera cam, int width, int height)
@@ -56,7 +55,7 @@ public class Snapshot : MonoBehaviour
         tex.SetPixels32(color);
     }
 
-    void SaveTexture(Texture2D texture, string name, string key)
+    void SaveTexture(Texture2D texture, string name)
     {
         MakePNGAlpha(texture);
         byte[] pngData = texture.EncodeToPNG();

@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: ice
   m_EditorClassIdentifier: 
   islandType: 3
-  basePrefab: {fileID: 688106766369309686, guid: 263cadd04e4f9504e8d78f51a6ee8d1b,
+  basePrefab: {fileID: 8258164667678476797, guid: 263cadd04e4f9504e8d78f51a6ee8d1b,
     type: 3}
   stagePrefab: {fileID: 1756826652663252117, guid: d72911ad94dba5a4fa0bff239a5a20f9,
     type: 3}
   objects:
-  - prefab: {fileID: 7906624372495607167, guid: 3908be712a81620439c39ee6dc61d248,
+  - prefab: {fileID: 1602649969396442953, guid: 3908be712a81620439c39ee6dc61d248,
       type: 3}
     sideLen: 1
   - prefab: {fileID: 7538338312259919638, guid: db2abf157d4a6244789c3bd12cd51692,

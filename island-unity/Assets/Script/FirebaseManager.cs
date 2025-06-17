@@ -21,6 +21,7 @@ public class FirebaseDataThread
 public class FirebaseManager : MonoBehaviour
 {
     public IslandManage islandManage;
+    private int existingDataCount = 0;
 
     void Start()
     {
@@ -44,17 +45,34 @@ public class FirebaseManager : MonoBehaviour
         // 取得資料庫的根引用
         DatabaseReference databaseReference = FirebaseDatabase.DefaultInstance.GetReference("threads");
 
-        // 監聽 exampleNode 資料的變化
-        databaseReference.ChildAdded += HandleChildAdded;
+        //讀目前已存在的資料數
+        databaseReference.GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted && task.Result.Exists)
+            {
+                existingDataCount = (int)task.Result.ChildrenCount;
+                Debug.Log("Existing data count: " + existingDataCount);
+            }
+
+            // 監聽 exampleNode 資料的變化
+            databaseReference.ChildAdded += HandleChildAdded;
+        });
 
         Debug.Log("資料庫監聽已啟動！");
     }
 
     void HandleChildAdded(object sender, ChildChangedEventArgs e)
     {
+        //監聽錯誤
         if (e.DatabaseError != null)
         {
             Debug.LogError($"資料庫監聽錯誤：{e.DatabaseError.Message}");
+            return;
+        }
+
+        //讀取已存在數據後不理他，預設留十個
+        if(existingDataCount > 10){
+            existingDataCount--;
             return;
         }
 

@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1611633078716226881}
-  m_Layer: 0
+  - component: {fileID: 121684201976459798}
+  - component: {fileID: 3054609173532608980}
+  m_Layer: 8
   m_Name: desert_000_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,6 +35,48 @@ Transform:
   - {fileID: 6194056197225580903}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &121684201976459798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2155573526698546940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dd8a55fb4c8b5b4491534607644ab5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 
+  thread_id: desert
+  topics:
+  - Fear
+  - Worry
+  - Nervousness
+  islandBase: 0
+  worldPos: {x: 0, y: 0}
+  snapshot: {fileID: 0}
+--- !u!65 &3054609173532608980
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2155573526698546940}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4, y: 2, z: 4}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4725711886358678164
 GameObject:
   m_ObjectHideFlags: 0

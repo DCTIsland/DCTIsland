@@ -8,28 +8,33 @@ public class InputManage : MonoBehaviour
     public IslandManage islandManage;
     //public GenerateAIObj generateAIObj;
 
-    public void InputTest()
+    int[] testTypeArr = new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 2};
+    int i = 0;
+
+    public void GenIslandTest()
     {
         int rndID = Random.Range(0, 100);
-        int rndType = Random.Range(0, 5);
-        islandManage.id = $"test{rndID}";
-        islandManage.thread_id = $"test{rndID}";
-        islandManage.islandBase = (IslandType)rndType;
-        islandManage.mascotTexName = "";
-        //generateAIObj.prompt = "mouse";
+        string[] emotion = {"Happiness", "Sadness", "Anger", "Fear", "Disgust"};
+        int rndType = Random.Range(0, emotion.Length);
+
+        FirebaseDataThread data = new FirebaseDataThread{
+            emotion = emotion[rndType],
+            image_url = "",
+            link = "",
+            thread_id = $"test{rndID}",
+            topic1 = "",
+            topic2 = "",
+            topic3 = "",
+        };
+
+        islandManage.AddToQueue($"test{rndID}", data);
         
-        islandManage.LoadIsland();
+        if(i < testTypeArr.Length - 1)
+            i++;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void DestroyTest()
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        islandManage.Quake();
     }
 }
